@@ -1,0 +1,21 @@
+{
+	"name": "lekoala/silverstripe-devtoolkit",
+	"description": "Collection of useful developer stuff for Silverstripe",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "developer", "module", "cms"],
+	"license": "BSD-3-Clause",
+	"authors": [
+		{
+			"name": "LeKoala",
+			"email": "thomas@lekoala.be"
+		}
+	],
+	"require":
+			{
+				"silverstripe/framework": "~3.1"
+			},
+	"extra": {
+		"installer-name": "devtoolkit"
+	}
+
+}
