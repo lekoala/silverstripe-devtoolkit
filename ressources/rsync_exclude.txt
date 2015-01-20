@@ -1,10 +1,14 @@
 assets/
+_dev/
 composer.json
 composer.lock
 error.log
+deploy.log
 rsync_exclude.txt
 silverstripe.log
 nbproject/
+silverstripe-cache/
+_ss_environment.php
 .svn
 .git
 .gitignore

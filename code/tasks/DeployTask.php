@@ -63,9 +63,11 @@ class DeployTask extends BuildTask
 
         $this->out('Running script as '.exec('whoami'));
 
+        $verbosessh = '';
+
 //        $output = '';
 //        chdir(Director::baseFolder());
-        $script = 'rsync'.$dry.' -az --force --delete --progress --exclude-from=rsync_exclude.txt -e "ssh -v -p'.$port.'" ./ '.$sshtarget.' 2>&1';
+        $script = 'rsync'.$dry.' -az --force --delete --progress --exclude-from=rsync_exclude.txt -e "ssh'.$verbosessh.' -p'.$port.'" ./ '.$sshtarget.' > deploy.log';
         $this->out($script);
 //        exec($script, $output);
 //        foreach ($output as $line) {
