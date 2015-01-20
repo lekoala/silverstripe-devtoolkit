@@ -1,0 +1,12 @@
+assets/
+composer.json
+composer.lock
+error.log
+rsync_exclude.txt
+silverstripe.log
+nbproject/
+.svn
+.git
+.gitignore
+.gitmodules
+.DS_Store
