@@ -28,14 +28,14 @@ class DeployTask extends BuildTask
 
         if ($target == 'staging') {
             if (!defined('DEPLOY_STAGING_PORT') || !defined('DEPLOY_STAGING_TARGET')) {
-                $this->out('Missing constant. Please define in _ss_environment');
+                $this->out('Missing constant. Please define DEPLOY_STAGING_PORT and DEPLOY_STAGING_TARGET in your _ss_environment');
                 exit();
             }
             $port      = DEPLOY_STAGING_PORT;
             $sshtarget = DEPLOY_STAGING_TARGET;
         } else if ($target == 'live') {
             if (!defined('DEPLOY_LIVE_PORT') || !defined('DEPLOY_LIVE_TARGET')) {
-                $this->out('Missing constant. Please define in _ss_environment');
+                $this->out('Missing constant. Please define DEPLOY_LIVE_PORT and DEPLOY_LIVE_TARGET in your _ss_environment');
                 exit();
             }
             $port      = DEPLOY_LIVE_PORT;
@@ -55,26 +55,25 @@ class DeployTask extends BuildTask
         
         $dry = '';
         if ($go) {
-            $this->out('Executing actual deploy on '.$target);
+            $this->out('Building actual deploy on '.$target);
         } else {
             $dry = ' --dry-run';
-            $this->out('Executing dry run on '.$target);
+            $this->out('Building dry run on '.$target . '. Pass &go=1 to build actual run script.');
         }
 
         $this->out('Running script as '.exec('whoami'));
 
         $verbosessh = '';
 
-//        $output = '';
-//        chdir(Director::baseFolder());
         $script = 'rsync'.$dry.' -az --force --delete --progress --exclude-from=rsync_exclude.txt -e "ssh'.$verbosessh.' -p'.$port.'" ./ '.$sshtarget.' > deploy.log';
         $this->out($script);
-//        exec($script, $output);
-//        foreach ($output as $line) {
-//            $this->out($line);
-//        }
-
         $this->out('Run the above line in the command line');
+        $this->out('You might need to change the file owner. If so, run:');
+
+        $target_parts = explode(':', $sshtarget);
+
+        $chown_script = 'ssh -p' . $port . ' ' . $sshtarget . " 'chown -R apache:apache ".$target_parts[1]."'";
+        $this->out($chown_script);
     }
 
     public function out($message)
