@@ -10,10 +10,9 @@
 			"email": "thomas@lekoala.be"
 		}
 	],
-	"require":
-			{
-				"silverstripe/framework": "~3.1"
-			},
+	"require": {
+		"silverstripe/framework": "~3.1"
+	},
 	"extra": {
 		"installer-name": "devtoolkit"
 	}

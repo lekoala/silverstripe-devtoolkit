@@ -26,6 +26,9 @@ class DeployTask extends BuildTask
             exit();
         }
 
+        $user  = 'apache';
+        $group = 'apache';
+
         if ($target == 'staging') {
             if (!defined('DEPLOY_STAGING_PORT') || !defined('DEPLOY_STAGING_TARGET')) {
                 $this->out('Missing constant. Please define DEPLOY_STAGING_PORT and DEPLOY_STAGING_TARGET in your _ss_environment');
@@ -33,6 +36,12 @@ class DeployTask extends BuildTask
             }
             $port      = DEPLOY_STAGING_PORT;
             $sshtarget = DEPLOY_STAGING_TARGET;
+            if (defined('DEPLOY_STAGING_USER')) {
+                $user = DEPLOY_STAGING_USER;
+            }
+            if (defined('DEPLOY_STAGING_GROUP')) {
+                $group = DEPLOY_STAGING_GROUP;
+            }
         } else if ($target == 'live') {
             if (!defined('DEPLOY_LIVE_PORT') || !defined('DEPLOY_LIVE_TARGET')) {
                 $this->out('Missing constant. Please define DEPLOY_LIVE_PORT and DEPLOY_LIVE_TARGET in your _ss_environment');
@@ -40,44 +49,55 @@ class DeployTask extends BuildTask
             }
             $port      = DEPLOY_LIVE_PORT;
             $sshtarget = DEPLOY_LIVE_TARGET;
+            if (defined('DEPLOY_LIVE_USER')) {
+                $user = DEPLOY_LIVE_USER;
+            }
+            if (defined('DEPLOY_LIVE_GROUP')) {
+                $group = DEPLOY_LIVE_GROUP;
+            }
         } else {
             $this->out('Invalid target');
             exit();
         }
 
-        $hosts = exec('cat ~/.ssh/known_hosts');
-        if(!strlen($hosts)) {
+        $hosts = shell_exec('cat ~/.ssh/known_hosts');
+        if (!strlen($hosts)) {
             $this->out('No known hosts to deploy to');
             exit();
         }
 
-//        $this->out(shell_exec('ssh-add -l 2>&1'));
-        
         $dry = '';
         if ($go) {
             $this->out('Building actual deploy on '.$target);
         } else {
             $dry = ' --dry-run';
-            $this->out('Building dry run on '.$target . '. Pass &go=1 to build actual run script.');
+            $this->out('Building dry run on '.$target.'. Pass &go=1 to build actual run script.');
         }
 
-        $this->out('Running script as '.exec('whoami'));
+        $current_user = exec('whoami');
+        $this->out('Running script as '.$current_user);
 
         $verbosessh = '';
 
-        $script = 'rsync'.$dry.' -az --force --delete --progress --exclude-from=rsync_exclude.txt -e "ssh'.$verbosessh.' -p'.$port.'" ./ '.$sshtarget.' > deploy.log';
-        $this->out($script);
-        $this->out('Run the above line in the command line');
-        $this->out('You might need to change the file owner. If so, run:');
+        $target_parts  = explode(':', $sshtarget);
+        $address       = $target_parts[0];
+        $address_parts = explode('@', $address);
+        $domain        = array_pop($address_parts);
+        $folder        = $target_parts[1];
 
-        $target_parts = explode(':', $sshtarget);
+        $script       = 'rsync'.$dry.' -az --force --delete --progress --exclude-from=rsync_exclude.txt -e "ssh'.$verbosessh.' -p'.$port.'" ./ '.$sshtarget;
+        $script_log   = $script.' > deploy.log';
+        $chown_script = 'ssh -p'.$port.' '.$domain." 'chown -R $user:$group ".$folder."'";
 
-        $chown_script = 'ssh -p' . $port . ' ' . $sshtarget . " 'chown -R apache:apache ".$target_parts[1]."'";
+        $this->out('Run the command line below from the terminal:');
+        $this->out($script_log);
+
+        $this->out('You might need to change the file owner. If so, also run:');
         $this->out($chown_script);
     }
 
     public function out($message)
     {
-        echo $message."<br/>";
+        echo nl2br($message)."<br/>";
     }
 }
