@@ -5,6 +5,10 @@
  *
  * This task suppose that you run apache as your main user (if you have access, apache will have access)
  *
+ * To run on windows, use:
+ * - OpenSSH : http://sourceforge.net/projects/sshwindows/files/OpenSSH%20for%20Windows%20-%20Release/
+ * - cwRsync : https://www.itefix.net/cwrsync
+ *
  * @link https://coderwall.com/p/moabdw/using-rsync-to-deploy-a-website-easy-one-liner-command
  * @author lekoala
  */
@@ -30,11 +34,11 @@ class DeployTask extends BuildTask
         $group = 'apache';
 
         if ($target == 'staging') {
-            if (!defined('DEPLOY_STAGING_PORT') || !defined('DEPLOY_STAGING_TARGET')) {
-                $this->out('Missing constant. Please define DEPLOY_STAGING_PORT and DEPLOY_STAGING_TARGET in your _ss_environment');
+            if (!defined('DEPLOY_STAGING_TARGET')) {
+                $this->out('Missing constant. Please define DEPLOY_STAGING_TARGET in your _ss_environment');
                 exit();
             }
-            $port      = DEPLOY_STAGING_PORT;
+            $port      = defined('DEPLOY_STAGING_PORT') ? DEPLOY_STAGING_PORT : 21;
             $sshtarget = DEPLOY_STAGING_TARGET;
             if (defined('DEPLOY_STAGING_USER')) {
                 $user = DEPLOY_STAGING_USER;
@@ -43,11 +47,11 @@ class DeployTask extends BuildTask
                 $group = DEPLOY_STAGING_GROUP;
             }
         } else if ($target == 'live') {
-            if (!defined('DEPLOY_LIVE_PORT') || !defined('DEPLOY_LIVE_TARGET')) {
-                $this->out('Missing constant. Please define DEPLOY_LIVE_PORT and DEPLOY_LIVE_TARGET in your _ss_environment');
+            if (!defined('DEPLOY_LIVE_TARGET')) {
+                $this->out('Missing constant. Please define DEPLOY_LIVE_TARGET in your _ss_environment');
                 exit();
             }
-            $port      = DEPLOY_LIVE_PORT;
+            $port      = defined('DEPLOY_LIVE_PORT') ? DEPLOY_LIVE_PORT : 21;
             $sshtarget = DEPLOY_LIVE_TARGET;
             if (defined('DEPLOY_LIVE_USER')) {
                 $user = DEPLOY_LIVE_USER;
@@ -63,7 +67,6 @@ class DeployTask extends BuildTask
         $hosts = shell_exec('cat ~/.ssh/known_hosts');
         if (!strlen($hosts)) {
             $this->out('No known hosts to deploy to');
-            exit();
         }
 
         $dry = '';
@@ -85,7 +88,12 @@ class DeployTask extends BuildTask
         $domain        = array_pop($address_parts);
         $folder        = $target_parts[1];
 
-        $script       = 'rsync'.$dry.' -az --force --delete --progress --exclude-from=rsync_exclude.txt -e "ssh'.$verbosessh.' -p'.$port.'" ./ '.$sshtarget;
+        $portcmd = '';
+        if ($port != 21) {
+            $portcmd = ' -p'.$port;
+        }
+
+        $script       = 'rsync'.$dry.' -az --force --delete --progress --exclude-from=rsync_exclude.txt -e "ssh'.$verbosessh.$portcmd.'" ./ '.$sshtarget;
         $script_log   = $script.' > deploy.log';
         $chown_script = 'ssh -p'.$port.' '.$domain." 'chown -R $user:$group ".$folder."'";
 
