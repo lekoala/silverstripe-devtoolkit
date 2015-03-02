@@ -1,4 +1,7 @@
 <?php
+
+if(!defined('DEVTOOLKIT_PATH')) define('DEVTOOLKIT_PATH', rtrim(basename(dirname(__FILE__))));
+
 // Define logging - don't forget to disable access to log files in htaccess, see ressources folder for sample htaccess
 ini_set('error_log', Director::baseFolder().'/error.log');
 SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/silverstripe.log'),
