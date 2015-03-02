@@ -13,6 +13,11 @@
 	"require": {
 		"silverstripe/framework": "~3.1"
 	},
+	"suggest": {
+		"nathancox/codeeditorfield": "A good html editor for Silverstripe",
+		"jonom/silverstripe-betternavigator": "A good replacement for SilverstripeNavigator",
+		"unclecheese/betterbuttons": "ModelAdmin like it should be"
+	},
 	"extra": {
 		"installer-name": "devtoolkit"
 	}

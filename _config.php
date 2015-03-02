@@ -24,6 +24,7 @@ if (Director::isDev()) {
     // In production, sanitize php environment to avoid leaking information
     error_reporting(0);
     ini_set('display_errors', false);
+    // Warn admin if errors occur
     SS_Log::add_writer(new SS_LogEmailWriter(Email::config()->admin_email),
         SS_Log::ERR, '<=');
 }
