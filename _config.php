@@ -1,6 +1,11 @@
 <?php
+if (!defined('DEVTOOLKIT_PATH')) {
+    define('DEVTOOLKIT_PATH', rtrim(basename(dirname(__FILE__))));
+}
 
-if(!defined('DEVTOOLKIT_PATH')) define('DEVTOOLKIT_PATH', rtrim(basename(dirname(__FILE__))));
+// Use _ss_environment.php, otherwise Director::isDev won't work properly
+// See sample _ss_environment file in /ressources folder
+require_once('conf/ConfigureFromEnv.php');
 
 // Define logging - don't forget to disable access to log files in htaccess, see ressources folder for sample htaccess
 ini_set('error_log', Director::baseFolder().'/error.log');
@@ -46,7 +51,6 @@ if (Director::isTest()) {
     }
     BasicAuth::protect_entire_site();
 }
-
 
 // CodeEditorField integration
 if (class_exists('CodeEditorField')) {
