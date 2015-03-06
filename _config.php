@@ -24,7 +24,7 @@ if (Director::isDev()) {
         DynamicCache::config()->enabled = false;
     }
     // Disable default cache
-    SS_Cache::set_cache_lifetime('default', -1, 100);
+    // SS_Cache::set_cache_lifetime('default', -1, 100);
 } else {
     // In production, sanitize php environment to avoid leaking information
     error_reporting(0);
