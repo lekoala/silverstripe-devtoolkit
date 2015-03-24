@@ -48,6 +48,7 @@ class ActiveLocalesExtension extends DataExtension
             return;
         }
 
+        // Find in set is only compatible with MySql
         $c = DB::getConn();
         if (!$c instanceof MySQLDatabase) {
             return;
@@ -83,16 +84,24 @@ class ActiveLocalesExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields)
     {
+        $localesNames = Fluent::locale_names();
+        if (!$this->owner instanceof SiteConfig) {
+            // If the ActiveLocales has been applied to SiteConfig, restrict locales to allowed ones
+            $conf = SiteConfig::current_site_config();
+            if ($conf->hasExtension('ActiveLocalesExtension') && $conf->ActiveLocales) {
+                $localesNames = $conf->ActiveLocalesNames();
+            }
+        }
 
-        $languages = array();
-        foreach (Fluent::locales() as $locale) {
-            $languages[$locale] = i18n::get_locale_name($locale);
+        // Avoid clutter if we only have one locale anyway
+        if(count($localesNames) === 1) {
+            return;
         }
 
         $fields->addFieldToTab('Root.Main',
             $lang = new ListboxField('ActiveLocales',
             _t('ActiveLocalesExtension.ACTIVELOCALE', 'Active Languages'),
-            $languages));
+            $localesNames));
         $lang->setMultiple(true);
         return $fields;
     }
@@ -104,6 +113,9 @@ class ActiveLocalesExtension extends DataExtension
      */
     public function ThisActiveLocalesList()
     {
+        if (!$this->owner->hasMethod('LocaleInformation')) {
+            return new ArrayList();
+        }
         $data = array();
         $list = $this->owner->ActiveLocales;
         foreach (explode(',', $list) as $locale) {
@@ -119,12 +131,29 @@ class ActiveLocalesExtension extends DataExtension
      */
     public function ActiveLocalesList()
     {
+        if (!$this->owner->hasMethod('LocaleInformation')) {
+            return new ArrayList();
+        }
         $data = array();
         $list = SiteConfig::current_site_config()->ActiveLocales;
-        $ctrl = Controller::curr();
         foreach (explode(',', $list) as $locale) {
-            $data[] = $ctrl->LocaleInformation($locale);
+            $data[] = $this->owner->LocaleInformation($locale);
         }
         return new ArrayList($data);
+    }
+
+    /**
+     * Return a list of actives locales
+     * 
+     * @return array
+     */
+    public function ActiveLocalesNames()
+    {
+        $locales = array();
+        $list    = $this->owner->ActiveLocales;
+        foreach (explode(',', $list) as $locale) {
+            $locales[$locale] = i18n::get_locale_name($locale);
+        }
+        return $locales;
     }
 }
