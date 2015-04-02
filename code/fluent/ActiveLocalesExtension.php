@@ -94,7 +94,7 @@ class ActiveLocalesExtension extends DataExtension
         }
 
         // Avoid clutter if we only have one locale anyway
-        if(count($localesNames) === 1) {
+        if (count($localesNames) === 1) {
             return;
         }
 
@@ -118,6 +118,9 @@ class ActiveLocalesExtension extends DataExtension
         }
         $data = array();
         $list = $this->owner->ActiveLocales;
+        if (!$list) {
+            return $this->owner->Locales();
+        }
         foreach (explode(',', $list) as $locale) {
             $data[] = $this->owner->LocaleInformation($locale);
         }
@@ -135,7 +138,11 @@ class ActiveLocalesExtension extends DataExtension
             return new ArrayList();
         }
         $data = array();
-        $list = SiteConfig::current_site_config()->ActiveLocales;
+        $config = SiteConfig::current_site_config();
+        $list = $config->ActiveLocales;
+        if (!$list) {
+            return $config->Locales();
+        }
         foreach (explode(',', $list) as $locale) {
             $data[] = $this->owner->LocaleInformation($locale);
         }
@@ -151,9 +158,26 @@ class ActiveLocalesExtension extends DataExtension
     {
         $locales = array();
         $list    = $this->owner->ActiveLocales;
+        if (!$list) {
+            return Fluent::locale_names();
+        }
         foreach (explode(',', $list) as $locale) {
             $locales[$locale] = i18n::get_locale_name($locale);
         }
         return $locales;
+    }
+
+    /**
+     * If only one locale is active
+     * 
+     * @return string|boolean The active locale or false
+     */
+    public function HasOnlyOneLocale()
+    {
+        if ($this->owner->ActiveLocales && substr_count($this->owner->ActiveLocales,
+                ',') === 1) {
+            return $this->owner->ActiveLocales;
+        }
+        return false;
     }
 }
