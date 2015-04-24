@@ -23,6 +23,9 @@ if (Director::isDev()) {
     if (class_exists('DynamicCache')) {
         DynamicCache::config()->enabled = false;
     }
+
+    Config::inst()->update('SSViewer', 'source_file_comments', true);
+
     // Disable default cache
     // SS_Cache::set_cache_lifetime('default', -1, 100);
 } else {
