@@ -137,9 +137,9 @@ class ActiveLocalesExtension extends DataExtension
         if (!$this->owner->hasMethod('LocaleInformation')) {
             return new ArrayList();
         }
-        $data = array();
+        $data   = array();
         $config = SiteConfig::current_site_config();
-        $list = $config->ActiveLocales;
+        $list   = $config->ActiveLocales;
         if (!$list) {
             return $config->Locales();
         }
@@ -174,9 +174,13 @@ class ActiveLocalesExtension extends DataExtension
      */
     public function HasOnlyOneLocale()
     {
-        if ($this->owner->ActiveLocales && substr_count($this->owner->ActiveLocales,
-                ',') === 1) {
-            return $this->owner->ActiveLocales;
+        $list = $this->owner->ActiveLocales;
+        if (!$list) {
+            $list = implode(',', array_keys(Fluent::locale_names()));
+        }
+        $list = trim($list, ',');
+        if ($list && strpos($list, ',') === false) {
+            return $list;
         }
         return false;
     }
