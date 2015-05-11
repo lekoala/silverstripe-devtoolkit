@@ -26,8 +26,10 @@ if (Director::isDev()) {
 
     Config::inst()->update('SSViewer', 'source_file_comments', true);
 
-    // Disable default cache
-    // SS_Cache::set_cache_lifetime('default', -1, 100);
+    // Fix this issue https://github.com/silverstripe/silverstripe-framework/issues/4146
+    if (isset($_GET['flush'])) {
+        i18n::get_cache()->clean(Zend_Cache::CLEANING_MODE_ALL);
+    }
 } else {
     // In production, sanitize php environment to avoid leaking information
     error_reporting(0);
