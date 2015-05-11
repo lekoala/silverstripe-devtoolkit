@@ -6,4 +6,7 @@ After:
 ---
 # A smarter global partial key
 SSViewer:
-    global_key: '$CurrentReadingMode, $ContentLocale, $SiteConfig.ID'
+  global_key: '$CurrentReadingMode, $ContentLocale, $SiteConfig.ID'
+ModelAdmin:
+  extensions:
+    - DevToolkitAdminExtension
