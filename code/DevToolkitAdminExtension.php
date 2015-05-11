@@ -218,9 +218,7 @@ class DevToolkitAddFakeButton implements GridField_HTMLProvider, GridField_Actio
             }
         }
 
-        $o = singleton($class);
-
-        if (!$o->hasMethod('provideFake')) {
+        if (!method_exists($class, 'provideFake')) {
             DevToolkitAdminExtension::SetSessionMessage("This object does not implement provideFake method",
                 'bad');
             return Controller::curr()->redirectBack();
