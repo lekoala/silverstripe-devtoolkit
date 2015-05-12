@@ -10,3 +10,6 @@ SSViewer:
 ModelAdmin:
   extensions:
     - DevToolkitAdminExtension
+SiteConfig:
+  extensions:
+    - DevToolkitSiteConfigExtension
