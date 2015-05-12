@@ -27,6 +27,9 @@ class DevToolkitAdminExtension extends DataExtension
         if ($o->hasMethod('provideFake')) {
             $gfConfig->addComponent($btnAddFake = new DevToolkitAddFakeButton('buttons-after-left'));
         }
+        if ($o->hasExtension('GeoExtension')) {
+            $gfConfig->addComponent($btnAddFake = new DevToolkitFakeLocationsButton('buttons-after-left'));
+        }
         $gfConfig->addComponent($btnDump = new DevToolkitDumpButton('buttons-after-left'));
 
         $message = self::SessionMessage();
@@ -93,7 +96,7 @@ class DevToolkitEmptyButton implements GridField_HTMLProvider, GridField_ActionP
     public function getHTMLFragments($gridField)
     {
         $button = new GridField_FormAction(
-            $gridField, 'export', _t('DevToolkitEmptyButton.TITLE', 'Empty'),
+            $gridField, 'empty', _t('DevToolkitEmptyButton.TITLE', 'Empty'),
             'empty', null
         );
         $button->addExtraClass('no-ajax');
@@ -170,7 +173,7 @@ class DevToolkitAddFakeButton implements GridField_HTMLProvider, GridField_Actio
     public function getHTMLFragments($gridField)
     {
         $button = new GridField_FormAction(
-            $gridField, 'export',
+            $gridField, 'add_fake',
             _t('DevToolkitAddFakeButton.TITLE', 'Add fake'), 'add_fake', null
         );
         $button->addExtraClass('no-ajax');
@@ -255,7 +258,7 @@ class DevToolkitDumpButton implements GridField_HTMLProvider, GridField_ActionPr
     public function getHTMLFragments($gridField)
     {
         $button = new GridField_FormAction(
-            $gridField, 'export',
+            $gridField, 'dump_sql',
             _t('DevToolkitDumpButton.TITLE', 'Dump to sql'), 'dump_sql', null
         );
         $button->addExtraClass('no-ajax');
@@ -295,7 +298,7 @@ class DevToolkitDumpButton implements GridField_HTMLProvider, GridField_ActionPr
     public function handleDump($gridField, $request = null)
     {
         $class = $gridField->getModelClass();
-        
+
         $dumpSettings = array(
             'compress' => 'NONE',
             'include-tables' => array($class),
@@ -321,5 +324,104 @@ class DevToolkitDumpButton implements GridField_HTMLProvider, GridField_ActionPr
 
         $link = '/assets'.$webdir.$filename;
         return Controller::curr()->redirect($link);
+    }
+}
+
+class DevToolkitFakeLocationsButton implements GridField_HTMLProvider, GridField_ActionProvider,
+    GridField_URLHandler
+{
+    /**
+     * Fragment to write the button to
+     */
+    protected $targetFragment;
+
+    /**
+     * @param string $targetFragment The HTML fragment to write the button into
+     */
+    public function __construct($targetFragment = "after")
+    {
+        $this->targetFragment = $targetFragment;
+    }
+
+    /**
+     * Place the export button in a <p> tag below the field
+     */
+    public function getHTMLFragments($gridField)
+    {
+        $button = new GridField_FormAction(
+            $gridField, 'fake_locations',
+            _t('DevToolkitFakeLocationsButton.TITLE', 'Add fake locations'),
+            'fake_locations', null
+        );
+        $button->addExtraClass('no-ajax');
+        return array(
+            $this->targetFragment => '<p class="grid-dump-button">'.$button->Field().'</p>',
+        );
+    }
+
+    /**
+     * export is an action button
+     */
+    public function getActions($gridField)
+    {
+        return array('fake_locations');
+    }
+
+    public function handleAction(GridField $gridField, $actionName, $arguments,
+                                 $data)
+    {
+        if ($actionName == 'fake_locations') {
+            return $this->handleFakeLocations($gridField);
+        }
+    }
+
+    /**
+     * it is also a URL
+     */
+    public function getURLHandlers($gridField)
+    {
+        return array(
+            'fake_locations' => 'handleFakeLocations',
+        );
+    }
+
+    /**
+     */
+    public function handleFakeLocations($gridField, $request = null)
+    {
+        $class = $gridField->getModelClass();
+
+        $all = $class::get();
+        foreach ($all as $record) {
+            if (!strlen(trim($record->StreetName))) {
+                $tries = 0;
+
+                do {
+                    $coords = FakeRecordGenerator::latLon(null, null, 200);
+                    $infos  = Geocoder::reverseGeocode($coords['lat'],
+                            $coords['lng']);
+                    $tries++;
+                } while (!$infos && $tries < 5);
+
+                if ($infos) {
+                    $record->Latitude     = $infos->getLatitude();
+                    $record->Longitude    = $infos->getLongitude();
+                    $record->StreetName   = $infos->getStreetName();
+                    $record->StreetNumber = $infos->getStreetNumber();
+                    $record->PostalCode   = $infos->getPostalCode();
+                    $record->CountryCode  = $infos->getCountryCode();
+                    $record->Locality     = $infos->getLocality();
+                    $record->write();
+                }
+            }
+        }
+        $message = sprintf(
+            _t('DevToolkitFakeLocationsButton.ADD_FAKE_LOCATIONS',
+                'Added fake locations to %s'), $class
+        );
+
+        DevToolkitAdminExtension::SetSessionMessage($message, 'good');
+
+        return Controller::curr()->redirectBack();
     }
 }
