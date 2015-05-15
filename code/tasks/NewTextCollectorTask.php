@@ -138,7 +138,8 @@ class NewTextCollectorTask extends i18nTextCollectorTask
 
         //Scope to mysite by default
         $restrictModules = ($request->getVar('module')) ? explode(',',
-                $request->getVar('module')) : 'mysite';
+                $request->getVar('module')) : array('mysite');
+
         return $c->run($restrictModules, true);
     }
 }
