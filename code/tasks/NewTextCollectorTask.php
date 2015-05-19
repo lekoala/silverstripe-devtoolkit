@@ -3,14 +3,37 @@
 class Newi18nTextCollector extends i18nTextCollector
 {
 
+    public function run($restrictToModules = null, $mergeWithExisting = false)
+    {
+        $entitiesByModule = $this->collect($restrictToModules,
+            $mergeWithExisting);
+
+        $results = array();
+
+        // Write each module language file
+        if ($entitiesByModule) {
+            foreach ($entitiesByModule as $module => $entities) {
+                $results[$module] = $this->getWriter()->write($entities,
+                    $this->defaultLocale, $this->baseSavePath.'/'.$module);
+            }
+        }
+
+        return $results;
+    }
+
     public function collect($restrictToModules = null, $mergeWithExisting = true)
     {
-        $modules      = scandir($this->basePath);
+        $glob    = glob($this->basePath.'/*', GLOB_ONLYDIR);
+        $modules = array_map(function($item) {
+            return basename($item);
+        }, $glob);
+
         $themeFolders = array();
 
-        // A master string tables array (one mst per module)
+        // A master string tables array (one master per module)
         $entitiesByModule = array();
 
+        // Scan themes
         foreach ($modules as $index => $module) {
             if ($module != 'themes') continue;
             else {
@@ -121,7 +144,8 @@ class Newi18nTextCollector extends i18nTextCollector
  */
 class NewTextCollectorTask extends i18nTextCollectorTask
 {
-    protected $title = "i18n Textcollector Task (improved)";
+    protected $title       = "i18n Textcollector Task (improved)";
+    protected $description = 'Create or update translation files';
 
     public function run($request)
     {
@@ -140,6 +164,22 @@ class NewTextCollectorTask extends i18nTextCollectorTask
         $restrictModules = ($request->getVar('module')) ? explode(',',
                 $request->getVar('module')) : array('mysite');
 
-        return $c->run($restrictModules, true);
+
+        echo 'You can pass ?module=mymodule,myothermodule to restrict to a specific module list<br/>';
+        echo 'You can specifty the locale you want to collect by using ?locale=fr<br/>';
+        echo '<hr/>';
+
+        echo 'Collecting text for '.implode(',', $restrictModules).' and locale '.$locale;
+        echo '<hr/>';
+
+        $result = $c->run($restrictModules, true);
+
+        foreach ($result as $module => $res) {
+            if ($res) {
+                echo "<div style='color:green'>Collected text from $module</div>";
+            } else {
+                echo "<div style='color:red'>Failed to collect text from $module</div>";
+            }
+        }
     }
 }
