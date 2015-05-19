@@ -174,6 +174,10 @@ class NewTextCollectorTask extends i18nTextCollectorTask
 
         $result = $c->run($restrictModules, true);
 
+        if(empty($result)) {
+            echo "<div style='color:orange'>The text collector did not collect anything</div>";
+        }
+
         foreach ($result as $module => $res) {
             if ($res) {
                 echo "<div style='color:green'>Collected text from $module</div>";
