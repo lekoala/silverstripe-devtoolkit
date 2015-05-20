@@ -2,6 +2,17 @@
 
 class Newi18nTextCollector extends i18nTextCollector
 {
+    protected $clearUnused = false;
+
+    function getClearUnused()
+    {
+        return $this->clearUnused;
+    }
+
+    function setClearUnused($clearUnused)
+    {
+        $this->clearUnused = $clearUnused;
+    }
 
     public function run($restrictToModules = null, $mergeWithExisting = false)
     {
@@ -23,6 +34,8 @@ class Newi18nTextCollector extends i18nTextCollector
 
     public function collect($restrictToModules = null, $mergeWithExisting = true)
     {
+        $clearUnused = $this->getClearUnused();
+
         $glob    = glob($this->basePath.'/*', GLOB_ONLYDIR);
         $modules = array_map(function($item) {
             return basename($item);
@@ -96,9 +109,22 @@ class Newi18nTextCollector extends i18nTextCollector
             }
 
             if ($mergeWithExisting) {
-                $adapter    = new i18nRailsYamlAdapter(array('locale' => $this->defaultLocale,
-                    'disableNotices' => true));
-//				$adapter = Injector::inst()->create('i18nRailsYamlAdapter');
+                $locale = $this->defaultLocale;
+
+                // If we pass simple lang instead of locale, Zend_Translate will complain
+                if (strlen($locale) == 2) {
+                    if (class_exists('Fluent')) {
+                        $fluentLocales = Fluent::locale_names();
+                        foreach ($fluentLocales as $fluentLocale => $name) {
+                            if (substr($fluentLocale, 0, 2) == $locale) {
+                                $locale = $fluentLocale;
+                            }
+                        }
+                    } else {
+                        $locale = i18n::get_locale_from_lang($locale);
+                    }
+                }
+                $adapter    = Injector::inst()->create('i18nRailsYamlAdapter');
                 $masterFile = "{$this->basePath}/{$module}/lang/"
                     .$adapter->getFilenameForLocale($this->defaultLocale);
                 if (!file_exists($masterFile)) {
@@ -109,7 +135,7 @@ class Newi18nTextCollector extends i18nTextCollector
                     'content' => $masterFile,
                     'locale' => $this->defaultLocale,
                     'reload' => true,
-//					'clear' => true
+                    'clear' => true
                 ));
 
                 //do not overwrite by interverting
@@ -119,9 +145,23 @@ class Newi18nTextCollector extends i18nTextCollector
                     return array($v);
                 }, $adapter->getMessages($this->defaultLocale)
                 );
+
                 $entitiesByModule[$module] = array_merge(
                     $entitiesByModule[$module], $messages
                 );
+
+                   //clear by diffing
+
+                if ($clearUnused) {
+                    $unusedEntities = array_diff( array_keys($messages), array_keys($processedEntities)
+                       );
+
+                    foreach($unusedEntities as $unusedEntity) {
+                        echo '<div style="color:red">Removed translations for ' . $unusedEntity . '</div>';
+                        unset($entitiesByModule[$module][$unusedEntity]);
+                    }
+                }
+
             }
         }
 
@@ -153,7 +193,14 @@ class NewTextCollectorTask extends i18nTextCollectorTask
 
         $locale = $request->getVar('locale') ? $request->getVar('locale') : 'en';
 
-        $c = new Newi18nTextCollector($locale);
+        $merge = $request->getVar('merge') ? $request->getVar('merge') : true;
+        $clear = $request->getVar('clear') ? $request->getVar('clear') : false;
+
+
+        $c = new Newi18nTextCollector($locale, $merge);
+        if ($clear) {
+            $c->setClearUnused($clear);
+        }
 
         $writer = $request->getVar('writer');
         if ($writer) {
@@ -167,6 +214,8 @@ class NewTextCollectorTask extends i18nTextCollectorTask
 
         echo 'You can pass ?module=mymodule,myothermodule to restrict to a specific module list<br/>';
         echo 'You can specifty the locale you want to collect by using ?locale=fr<br/>';
+        echo 'By default translations will be merged. Specify ?merge=0 to prevent that<br/>';
+        echo 'You can clear unused translations by specifying ?clear=1<br/>';
         echo '<hr/>';
 
         echo 'Collecting text for '.implode(',', $restrictModules).' and locale '.$locale;
@@ -174,7 +223,7 @@ class NewTextCollectorTask extends i18nTextCollectorTask
 
         $result = $c->run($restrictModules, true);
 
-        if(empty($result)) {
+        if (empty($result)) {
             echo "<div style='color:orange'>The text collector did not collect anything</div>";
         }
 
