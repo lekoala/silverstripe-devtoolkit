@@ -17,19 +17,25 @@ if (Director::isDev()) {
     // Add a debug logger
     SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/debug.log'),
         SS_Log::DEBUG, '=');
+    
     // Send emails to admin
     Email::send_all_emails_to(Email::config()->admin_email);
+
     // Disable DynamicCache
     if (class_exists('DynamicCache')) {
         DynamicCache::config()->enabled = false;
     }
 
+    // See where are included files
     Config::inst()->update('SSViewer', 'source_file_comments', true);
 
     // Fix this issue https://github.com/silverstripe/silverstripe-framework/issues/4146
     if (isset($_GET['flush'])) {
         i18n::get_cache()->clean(Zend_Cache::CLEANING_MODE_ALL);
     }
+
+    // Include Kint
+    require_once(__DIR__.'/code/thirdparty/Kint/Kint.class.php');
 } else {
     // In production, sanitize php environment to avoid leaking information
     error_reporting(0);
@@ -37,6 +43,9 @@ if (Director::isDev()) {
     // Warn admin if errors occur
     SS_Log::add_writer(new SS_LogEmailWriter(Email::config()->admin_email),
         SS_Log::ERR, '<=');
+
+    // Prevent errors when Kint is called
+    require_once(__DIR__.'/code/KintLiveShorthands.php');
 }
 
 // Protect website if env = isTest
