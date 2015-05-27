@@ -10,9 +10,6 @@ class DevToolkitAdminExtension extends DataExtension
 
     public function updateEditForm(CMSForm &$form)
     {
-        if (!Director::isDev() || !Permission::check('ADMIN')) {
-            return;
-        }
 
         $fields = $form->Fields();
 
@@ -20,18 +17,53 @@ class DevToolkitAdminExtension extends DataExtension
 
         $o = singleton($class);
 
-        $gf       = $form->Fields()->dataFieldByName($class);
-        $gfConfig = $gf->getConfig();
-        $gfConfig->addComponent(new GridFieldButtonRow('after'));
-        $gfConfig->addComponent($btnEmpty = new DevToolkitEmptyButton('buttons-after-left'));
+        $gf     = $form->Fields()->dataFieldByName($class);
+        $config = $gf->getConfig();
+
+        // If we have the bulk manager, enable by default
+        if (class_exists('GridFieldBulkManager')) {
+            if ($o->hasMethod('bulkManagerDisable') && $o->bulkManagerDisable) {
+
+            } else {
+                $config->addComponent($bulkManager = new GridFieldBulkManager());
+
+                if ($o->hasMethod('bulkManagerAdd')) {
+                    $actions = $o->bulkManagerAdd();
+
+                    foreach ($actions as $key => $action) {
+                        $bulkHandler = isset($action['Handler']) ? $action['Handler']
+                                : null;
+                        $bulkConfig  = isset($action['Config']) ? $action['Config']
+                                : null;
+                        $bulkManager->addBulkAction($action['Name'],
+                            $action['Label'], $bulkHandler, $bulkConfig);
+                    }
+                }
+            }
+        }
+
+        // If we have the export all button (form-extras module), enable
+        if (class_exists('GridFieldExportAllButton')) {
+
+            $config->addComponent(new GridFieldExportAllButton('before'));
+        }
+
+        if (!Director::isDev() || !Permission::check('ADMIN')) {
+            return;
+        }
+
+        // Add buttons
+        $config->addComponent(new GridFieldButtonRow('after'));
+        $config->addComponent($btnEmpty = new DevToolkitEmptyButton('buttons-after-left'));
         if ($o->hasMethod('provideFake')) {
-            $gfConfig->addComponent($btnAddFake = new DevToolkitAddFakeButton('buttons-after-left'));
+            $config->addComponent($btnAddFake = new DevToolkitAddFakeButton('buttons-after-left'));
         }
         if ($o->hasExtension('GeoExtension')) {
-            $gfConfig->addComponent($btnAddFake = new DevToolkitFakeLocationsButton('buttons-after-left'));
+            $config->addComponent($btnAddFake = new DevToolkitFakeLocationsButton('buttons-after-left'));
         }
-        $gfConfig->addComponent($btnDump = new DevToolkitDumpButton('buttons-after-left'));
+        $config->addComponent($btnDump = new DevToolkitDumpButton('buttons-after-left'));
 
+        // Show session message
         $message = self::SessionMessage();
         if ($message) {
             $fields->insertBefore(new LiteralField("dev_message",
