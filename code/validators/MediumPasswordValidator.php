@@ -13,7 +13,7 @@ class MediumPasswordValidator extends PasswordValidator
         parent::__construct();
         $this->minLength(6);
         $this->checkHistoricalPasswords(2);
-        $this->characterStrength(2, array("lowercase", "uppercase", "digits"));
+        $this->characterStrength(2, array("uppercase", "digits"));
     }
 
     static function applyToMember() {
