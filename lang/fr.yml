@@ -1,0 +1,19 @@
+fr:
+  ActiveLocalesExtension:
+    ACTIVELOCALE: 'Langues actives'
+  DevToolkitAddFakeButton:
+    FAKE_RECORD_ADDED: 'Faux enregistrement ajoutés'
+    TITLE: 'Ajouter des faux'
+  DevToolkitDumpButton:
+    TITLE: 'Export sql'
+  DevToolkitEmptyButton:
+    REMOVEDALL: 'Tous les enregistrements de type %s ont été enlevé'
+    TITLE: Vider
+  DevToolkitFakeLocationsButton:
+    ADD_FAKE_LOCATIONS: 'Fausses localisations ajoutées à %s'
+    TITLE: 'Ajouter des fausses localisations'
+  SlugExtension:
+    OPEN: Ouvrir
+  SlugHistory:
+    PLURALNAME: 'Anciens slug'
+    SINGULARNAME: 'Ancien slug'
