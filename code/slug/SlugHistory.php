@@ -60,6 +60,28 @@ class SlugHistory extends DataObject
     }
 
     /**
+     * Get a record from its old slug
+     *
+     * @param string $class
+     * @param string $slug
+     * @param int $excludeID
+     * @return DataObject
+     */
+    public static function getRecordByClass($class, $slug, $excludeID = null)
+    {
+        $historylist = self::getByClass($class, $slug);
+        if ($excludeID) {
+            $historylist = $historylist->exclude('RecordID', $excludeID);
+        }
+        $record = null;
+        $history = $historylist->first();
+        if ($history && $history->exists()) {
+            $record = $class::get()->byID($history->RecordID);
+        }
+        return $record;
+    }
+
+    /**
      * Check if a given slug is already stored
      *
      * @param string $class

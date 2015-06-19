@@ -130,14 +130,9 @@ class SlugExtension extends DataExtension
         }
         $record = $datalist->first();
         if ((!$record || !$record->exists()) && $checkHistory) {
-            // look in history
-            $historylist = SlugHistory::getByClass($class, $slug);
-            if ($excludeID) {
-                $historylist = $historylist->exclude('RecordID', $excludeID);
-            }
-            $history = $historylist->first();
-            if ($history && $history->exists()) {
-                $record = $class::get()->byID($history->RecordID);
+            $historyRecord = SlugHistory::getRecordByClass($class, $slug, $excludeID);
+            if($historyRecord) {
+                $record = $historyRecord;
             }
         }
         return $record;
