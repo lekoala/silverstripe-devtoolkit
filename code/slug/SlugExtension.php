@@ -12,8 +12,11 @@
  */
 class SlugExtension extends DataExtension
 {
-    private static $db = array(
+    private static $db      = array(
         'Slug' => 'Varchar(255)',
+    );
+    private static $indexes = array(
+        'Slug' => true,
     );
 
     public function onAfterWrite()

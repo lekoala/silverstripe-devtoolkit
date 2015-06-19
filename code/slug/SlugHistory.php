@@ -15,7 +15,12 @@ class SlugHistory extends DataObject
     private static $indexes = array(
         'RecordID' => true,
         'ObjectClass' => true,
-        'Slug' => true
+        'Slug' => true,
+        // make an index for faster searches by class and slug
+        'ObjectSlug' => array(
+            'type' => 'index',
+            'value' => '"ObjectClass","Slug"'
+        )
     );
 
     /**
