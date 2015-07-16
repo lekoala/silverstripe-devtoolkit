@@ -13,3 +13,10 @@ ModelAdmin:
 SiteConfig:
   extensions:
     - DevToolkitSiteConfigExtension
+---
+Only:
+  classexists: 'FluentExtension'
+---
+# ContentController:
+#  extensions:
+#    - TranslatableActionsControllerExtension

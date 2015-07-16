@@ -104,11 +104,11 @@ class SlugExtension extends DataExtension
         $page = $this->owner->Page();
         if (!$page) {
             if (Controller::has_curr()) {
-                return Controller::curr()->Link('view/'.$this->owner->Slug);
+                return Controller::curr()->Link('detail/'.$this->owner->Slug);
             }
             return '';
         }
-        return $page->Link('view/'.$this->owner->Slug);
+        return $page->Link('detail/'.$this->owner->Slug);
     }
 
     /**
