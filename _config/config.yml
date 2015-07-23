@@ -13,6 +13,15 @@ ModelAdmin:
 SiteConfig:
   extensions:
     - DevToolkitSiteConfigExtension
+Director:
+  rules:
+    'devtoolkitassets': 'DevToolkitAssetsController'
+DevToolkitAssetsController:
+  enable_audit: true
+  admin_ignore_rules: true
+  rules:
+    'private': 'logged-in'
+    'owner' : 'owner'
 # ---
 # Only:
 #  classexists: 'FluentExtension'
