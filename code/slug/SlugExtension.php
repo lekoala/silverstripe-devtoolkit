@@ -98,7 +98,7 @@ class SlugExtension extends DataExtension
      */
     public function Link()
     {
-        if (!$this->owner->Slug) {
+        if (!$this->owner->Slug && $this->owner->ID) {
             $this->owner->write();
         }
         $page = $this->owner->Page();
