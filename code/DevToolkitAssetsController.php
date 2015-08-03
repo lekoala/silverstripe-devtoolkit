@@ -46,7 +46,7 @@ class DevToolkitAssetsController extends Controller
                 }
             }
 
-            if (self::config()->admin_ignore_rules) {
+            if (self::config()->admin_ignore_rules && Permission::check('ADMIN')) {
                 $rule = self::RULE_ADMIN;
             }
 
