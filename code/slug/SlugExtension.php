@@ -91,17 +91,47 @@ class SlugExtension extends DataExtension
         }
     }
 
+    public function canWriteSlug()
+    {
+        $class  = $this->ownerBaseClass;
+        $config = Config::inst()->forClass($class);
+
+        // look for fields to use in slug
+        $fields = array('Title');
+        if ($config->slug_fields) {
+            $fields = $config->slug_fields;
+        }
+        $canWrite = false;
+        foreach ($fields as $field) {
+            if ($this->owner->$field) {
+                $canWrite = true;
+            }
+        }
+        return $canWrite;
+    }
+
     /**
      * Link to this record. Expect the "Page" method or relation to be set
+     *
+     * Page can either return a page object (method Link will be used) or
+     * a string (slug will be appended)
      * 
      * @return string
      */
     public function Link()
     {
         if (!$this->owner->Slug && $this->owner->ID) {
-            $this->owner->write();
+            if ($this->canWriteSlug()) {
+                $this->owner->write();
+            }
+            else {
+                return '';
+            }
         }
         $page = $this->owner->Page();
+        if(is_string($page)) {
+            return rtrim($page,'/') . '/' . $this->owner->Slug;
+        }
         if (!$page) {
             if (Controller::has_curr()) {
                 return Controller::curr()->Link('detail/'.$this->owner->Slug);
@@ -130,8 +160,9 @@ class SlugExtension extends DataExtension
         }
         $record = $datalist->first();
         if ((!$record || !$record->exists()) && $checkHistory) {
-            $historyRecord = SlugHistory::getRecordByClass($class, $slug, $excludeID);
-            if($historyRecord) {
+            $historyRecord = SlugHistory::getRecordByClass($class, $slug,
+                    $excludeID);
+            if ($historyRecord) {
                 $record = $historyRecord;
             }
         }
