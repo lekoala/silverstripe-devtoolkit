@@ -16,6 +16,7 @@ SiteConfig:
 Director:
   rules:
     'devtoolkitassets': 'DevToolkitAssetsController'
+    'robots.txt': 'DevRobotsController'
 DevToolkitAssetsController:
   enable_audit: true
   admin_ignore_rules: true
