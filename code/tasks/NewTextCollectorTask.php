@@ -150,18 +150,34 @@ class Newi18nTextCollector extends i18nTextCollector
                     $entitiesByModule[$module], $messages
                 );
 
-                   //clear by diffing
+                //clear by diffing
 
                 if ($clearUnused) {
-                    $unusedEntities = array_diff( array_keys($messages), array_keys($processedEntities)
-                       );
+                    $unusedEntities = array_diff(array_keys($messages),
+                        array_keys($processedEntities)
+                    );
 
-                    foreach($unusedEntities as $unusedEntity) {
-                        echo '<div style="color:red">Removed translations for ' . $unusedEntity . '</div>';
+                    foreach ($unusedEntities as $unusedEntity) {
+                        if (strpos($unusedEntity, '.db_') !== false) {
+                            continue;
+                        }
+                        if (strpos($unusedEntity, '.has_one_') !== false) {
+                            continue;
+                        }
+                        if (strpos($unusedEntity, '.has_many_') !== false) {
+                            continue;
+                        }
+                        if (strpos($unusedEntity, '.many_many') !== false) {
+                            continue;
+                        }
+                        if (strpos($unusedEntity, '.belongs_many_many') !== false) {
+                            continue;
+                        }
+
+                        echo '<div style="color:red">Removed translations for '.$unusedEntity.'</div>';
                         unset($entitiesByModule[$module][$unusedEntity]);
                     }
                 }
-
             }
         }
 
