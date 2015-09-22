@@ -174,7 +174,7 @@ class SlugExtension extends DataExtension
         $link = Director::absoluteURL($this->owner->Link());
         $view = _t('SlugExtension.OPEN', 'Open');
         $actions->push(
-            new BetterButtonLink(
+            new BetterButtonNewWindowLink(
             $view, $link
             )
         );
