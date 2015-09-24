@@ -17,6 +17,9 @@ Director:
   rules:
     'devtoolkitassets': 'DevToolkitAssetsController'
     'robots.txt': 'DevRobotsController'
+LeftAndMain:
+  extensions:
+    - DevToolkitLeftAndMainExtension
 DevToolkitAssetsController:
   enable_audit: true
   admin_ignore_rules: true
