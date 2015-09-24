@@ -25,11 +25,11 @@ class DevToolkitLeftAndMainExtension extends LeftAndMainExtension
         }
         $base           = AdminRootController::config()->url_base;
         $defaultPanel   = AdminRootController::config()->default_panel;
-        $segment        = Config::inst()->get($defaultPanel, 'url_segment');
         $currentSegment = $req->getURL();
 
         // We will fail if we are redirected to a panel without the proper permission
-        if ($currentSegment == $base && $defaultPanel == 'CMSPagesController' && !Permission::check('CMS_ACCESS_CMSMain')) {
+        if (($currentSegment == $base || $currentSegment == $base.'/pages') && $defaultPanel
+            == 'CMSPagesController' && !Permission::check('CMS_ACCESS_CMSMain')) {
             // Instead, let's redirect to something we can access
             if (Permission::check('CMS_ACCESS')) {
                 $member      = Member::currentUser();
