@@ -46,8 +46,11 @@ class DevToolkitAssetsController extends Controller
                 }
             }
 
+            if (self::config()->cms_access_ignore_rules && Permission::check('CMS_ACCESS')) {
+                $rule = self::RULE_PUBLIC;
+            }
             if (self::config()->admin_ignore_rules && Permission::check('ADMIN')) {
-                $rule = self::RULE_ADMIN;
+                $rule = self::RULE_PUBLIC;
             }
 
             switch ($rule) {

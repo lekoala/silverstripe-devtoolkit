@@ -22,6 +22,7 @@ LeftAndMain:
     - DevToolkitLeftAndMainExtension
 DevToolkitAssetsController:
   enable_audit: true
+  cms_access_ignore_rules: true
   admin_ignore_rules: true
   rules:
     'private': 'logged-in'
