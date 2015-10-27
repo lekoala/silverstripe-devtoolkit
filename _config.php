@@ -20,7 +20,7 @@ if (Director::isDev()) {
     // Add a debug logger
     SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/debug.log'),
         SS_Log::DEBUG, '=');
-    
+
     // Send emails to admin
     Email::send_all_emails_to(Email::config()->admin_email);
 
@@ -42,7 +42,7 @@ if (Director::isDev()) {
 } else {
     // In production, sanitize php environment to avoid leaking information
     ini_set('display_errors', false);
-    
+
     // Warn admin if errors occur
     SS_Log::add_writer(new SS_LogEmailWriter(Email::config()->admin_email),
         SS_Log::ERR, '<=');
@@ -76,4 +76,39 @@ if (class_exists('CodeEditorField')) {
     ));
     HtmlEditorConfig::get('cms')->insertButtonsBefore('fullscreen', 'aceeditor');
     HtmlEditorConfig::get('cms')->removeButtons('code');
+}
+
+if (defined('DEVTOOLKIT_USE_APC') && DEVTOOLKIT_USE_APC) {
+    SS_Cache::add_backend('two_level', 'Two-Levels',
+        array(
+        'slow_backend' => 'File',
+        'fast_backend' => 'APC',
+        'slow_backend_options' => array(
+            'cache_dir' => TEMP_FOLDER
+        )
+    ));
+    SS_Cache::pick_backend('two_level', 'any', 10);
+}
+if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
+    SS_Cache::add_backend('two_level', 'Two-Levels',
+        array(
+        'slow_backend' => 'File',
+        'fast_backend' => 'Memcached',
+        'slow_backend_options' => array(
+            'cache_dir' => TEMP_FOLDER
+        ),
+        'fast_backend_options' => array(
+            'servers' => array(
+                'host' => 'localhost',
+                'port' => 11211,
+                'persistent' => true,
+                'weight' => 1,
+                'timeout' => 5,
+                'retry_interval' => 15,
+                'status' => true,
+                'failure_callback' => null
+            )
+        )
+    ));
+    SS_Cache::pick_backend('two_level', 'any', 10);
 }
