@@ -90,6 +90,8 @@ if (defined('DEVTOOLKIT_USE_APC') && DEVTOOLKIT_USE_APC) {
     SS_Cache::pick_backend('two_level', 'any', 10);
 }
 if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
+    // Note : this use the Memcache extension, not the Memcached extension
+    // (with a d - which use libmemcached)
     SS_Cache::add_backend('two_level', 'Two-Levels',
         array(
         'slow_backend' => 'File',
@@ -111,4 +113,9 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
         )
     ));
     SS_Cache::pick_backend('two_level', 'any', 10);
+}
+
+// Really basic newrelic integration
+if(defined('NEWRELIC_APP_NAME')) {
+    newrelic_set_appname(NEWRELIC_APP_NAME . ";Silverstripe");
 }
