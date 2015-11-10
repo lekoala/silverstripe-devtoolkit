@@ -11,10 +11,23 @@ class DevRobotsController extends Controller
 
     public function index()
     {
+        $robots = BASE_PATH . '/robots.txt';
+        if(is_file($robots)) {
+            echo file_get_contents($robots);
+            exit();
+        }
         if (Director::isDev()) {
             echo "User-agent: *
 Disallow: /";
             exit();
+        }
+        else {
+            echo "User-agent: *
+Disallow: /admin
+Disallow: /?flush
+Disallow: /assets/private
+Disallow: /assets/owner
+Allow: /";
         }
     }
 }
