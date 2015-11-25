@@ -21,7 +21,7 @@ class RemoveInvalidPagesTask extends BuildTask
                 $classes).')');
         DB::query('DELETE FROM "SiteTree_Live" WHERE "ClassName" NOT IN ('.implode(',',
                 $classes).')');
-        DB::query('DELETE FROM "SiteTree_Versions" WHERE "ClassName" NOT IN ('.implode(',',
+        DB::query('DELETE FROM "SiteTree_versions" WHERE "ClassName" NOT IN ('.implode(',',
                 $classes).')');
         DB::alteration_message('All done!');
     }
