@@ -19,7 +19,7 @@ class RemoveSpacesFromFilenames extends BuildTask
             DB::alteration_message("Updating file #".$file->ID." with filename ".$file->Filename);
             $parts    = explode('/', $file->Filename);
             $filtered = array_map(function($item) use($filter) {
-                $filter->filter($item);
+                return $filter->filter($item);
             }, $parts);
             $file->Filename = implode('/', $filtered);
             $file->write();
