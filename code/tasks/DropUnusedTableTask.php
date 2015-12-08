@@ -53,7 +53,7 @@ class DropUnusedTableTask extends BuildTask
         //at this point, we should only have orphans table in dbTables var
         foreach ($dbTablesLc as $i => $table) {
             if ($go) {
-                DB::query('DROP TABLE '.$table);
+                DB::query('DROP TABLE `'.$table . '`');
                 DB::alteration_message("Dropped $table", 'obsolete');
             } else {
                 DB::alteration_message("Would drop $table", 'obsolete');
