@@ -14,6 +14,8 @@ class DropUnusedFieldsTask extends BuildTask
 
     public function run($request)
     {
+        increase_time_limit_to();
+
         $classes = ClassInfo::dataClassesFor('DataObject');
         $conn    = DB::getConn();
 
@@ -27,7 +29,7 @@ class DropUnusedFieldsTask extends BuildTask
                 }
                 if (strpos($fieldName, '_obsolete_') === 0) {
                     $this->dropColumns($class, array($fieldName));
-                    DB::alteration_message("Dropped $fieldName", "obsolete");
+                    DB::alteration_message("Dropped $fieldName for $class", "obsolete");
                     continue;
                 }
                 if (!isset($fields[$fieldName])) {
