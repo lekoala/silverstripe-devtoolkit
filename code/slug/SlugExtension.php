@@ -13,7 +13,7 @@
 class SlugExtension extends DataExtension
 {
     private static $db      = array(
-        'Slug' => 'Varchar(255)',
+        'Slug' => 'Varchar(150)',
     );
     private static $indexes = array(
         'Slug' => true,
@@ -54,7 +54,7 @@ class SlugExtension extends DataExtension
             $filter = new URLSegmentFilter;
 
             $oldSlug = $this->owner->Slug;
-            $newSlug = $filter->filter($slug);
+            $newSlug = substr($filter->filter($slug),0,140);
 
             $this->owner->Slug = $newSlug;
 
