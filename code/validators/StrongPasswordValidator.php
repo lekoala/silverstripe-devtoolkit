@@ -8,7 +8,7 @@
 class StrongPasswordValidator extends PasswordValidator
 {
 
-    function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->minLength(8);
@@ -17,7 +17,7 @@ class StrongPasswordValidator extends PasswordValidator
             array("lowercase", "uppercase", "digits", "punctuation"));
     }
 
-    static function applyToMember()
+    public static function applyToMember()
     {
         Member::set_password_validator(new StrongPasswordValidator);
     }

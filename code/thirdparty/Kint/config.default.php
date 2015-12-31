@@ -1,5 +1,5 @@
 <?php
-isset( $GLOBALS['_kint_settings'] ) or $GLOBALS['_kint_settings'] = array();
+isset($GLOBALS['_kint_settings']) or $GLOBALS['_kint_settings'] = array();
 $_kintSettings = &$GLOBALS['_kint_settings'];
 
 
@@ -22,7 +22,7 @@ $_kintSettings['displayCalledFrom'] = true;
  * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
  *
  */
-$_kintSettings['fileLinkFormat'] = ini_get( 'xdebug.file_link_format' );
+$_kintSettings['fileLinkFormat'] = ini_get('xdebug.file_link_format');
 
 
 /**
@@ -49,9 +49,9 @@ $_kintSettings['fileLinkFormat'] = ini_get( 'xdebug.file_link_format' );
  * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
  *
  */
-$_kintSettings['appRootDirs'] = isset( $_SERVER['DOCUMENT_ROOT'] )
-	? array( $_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;' )
-	: array();
+$_kintSettings['appRootDirs'] = isset($_SERVER['DOCUMENT_ROOT'])
+    ? array( $_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;' )
+    : array();
 
 
 /** @var int max length of string before it is truncated and displayed separately in full. Zero or false to disable */
@@ -75,4 +75,4 @@ $_kintSettings['cliDetection'] = true;
 $_kintSettings['cliColors'] = true;
 
 
-unset( $_kintSettings );
+unset($_kintSettings);

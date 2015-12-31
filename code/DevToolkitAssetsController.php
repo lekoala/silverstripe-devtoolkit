@@ -37,7 +37,6 @@ class DevToolkitAssetsController extends Controller
         $fileObj       = File::get()->filter(array('Filename' => Convert::raw2sql($fileAssetPath)))->first();
 
         if ($fileObj) {
-
             $rule = self::RULE_PUBLIC;
             foreach (self::config()->rules as $key => $value) {
                 $regex = '$^assets/'.trim($key, '/').'/$';
@@ -182,11 +181,11 @@ class FileAudit extends DataObject
             $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
 
             $ip = array_pop($ip);
-        } else if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } else if (!empty($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) {
+        } elseif (!empty($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
-        } else if (!empty($_SERVER['REMOTE_ADDR'])) {
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
 

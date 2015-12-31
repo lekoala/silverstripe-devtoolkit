@@ -4,12 +4,12 @@ class Newi18nTextCollector extends i18nTextCollector
 {
     protected $clearUnused = false;
 
-    function getClearUnused()
+    public function getClearUnused()
     {
         return $this->clearUnused;
     }
 
-    function setClearUnused($clearUnused)
+    public function setClearUnused($clearUnused)
     {
         $this->clearUnused = $clearUnused;
     }
@@ -37,7 +37,7 @@ class Newi18nTextCollector extends i18nTextCollector
         $clearUnused = $this->getClearUnused();
 
         $glob    = glob($this->basePath.'/*', GLOB_ONLYDIR);
-        $modules = array_map(function($item) {
+        $modules = array_map(function ($item) {
             return basename($item);
         }, $glob);
 
@@ -48,14 +48,14 @@ class Newi18nTextCollector extends i18nTextCollector
 
         // Scan themes
         foreach ($modules as $index => $module) {
-            if ($module != 'themes') continue;
-            else {
+            if ($module != 'themes') {
+                continue;
+            } else {
                 $themes = scandir($this->basePath."/themes");
                 if (count($themes)) {
                     foreach ($themes as $theme) {
                         if (is_dir($this->basePath."/themes/".$theme) && substr($theme,
                                 0, 1) != '.' && is_dir($this->basePath."/themes/".$theme."/templates")) {
-
                             $themeFolders[] = 'themes/'.$theme;
                         }
                     }
@@ -84,7 +84,9 @@ class Newi18nTextCollector extends i18nTextCollector
                 substr($module, 0, 7) == 'themes/' && is_dir("$this->basePath/$module")
                 );
 
-            if (!$isValidModuleFolder) continue;
+            if (!$isValidModuleFolder) {
+                continue;
+            }
 
             // we store the master string tables
             $processedEntities = $this->processModule($module);
@@ -100,8 +102,9 @@ class Newi18nTextCollector extends i18nTextCollector
             foreach ($entitiesByModule[$module] as $fullName => $spec) {
                 if (isset($spec[2]) && $spec[2] && $spec[2] != $module) {
                     $othermodule                               = $spec[2];
-                    if (!isset($entitiesByModule[$othermodule]))
-                            $entitiesByModule[$othermodule]            = array();
+                    if (!isset($entitiesByModule[$othermodule])) {
+                        $entitiesByModule[$othermodule]            = array();
+                    }
                     unset($spec[2]);
                     $entitiesByModule[$othermodule][$fullName] = $spec;
                     unset($entitiesByModule[$module][$fullName]);
@@ -141,7 +144,7 @@ class Newi18nTextCollector extends i18nTextCollector
                 //do not overwrite by interverting
                 $messages = array_map(
                     // Transform each master string from scalar value to array of strings
-                    function($v) {
+                    function ($v) {
                     return array($v);
                 }, $adapter->getMessages($this->defaultLocale)
                 );

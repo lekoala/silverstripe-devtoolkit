@@ -39,7 +39,7 @@ class DropUnusedFieldsTask extends BuildTask
         }
     }
 
-    function dropColumns($table, $columns)
+    public function dropColumns($table, $columns)
     {
         switch (get_class(DB::getConn())) {
             case 'SQLite3Database':
@@ -51,17 +51,18 @@ class DropUnusedFieldsTask extends BuildTask
         }
     }
 
-    function sqlDropColumns($table, $columns)
+    public function sqlDropColumns($table, $columns)
     {
         DB::query("ALTER TABLE \"$table\" DROP \"".implode('", DROP "', $columns)."\"");
     }
 
-    function sqlLiteDropColumns($table, $columns)
+    public function sqlLiteDropColumns($table, $columns)
     {
-
         $newColsSpec = $newCols     = array();
         foreach (DB::getConn()->fieldList($table) as $name => $spec) {
-            if (in_array($name, $columns)) continue;
+            if (in_array($name, $columns)) {
+                continue;
+            }
             $newColsSpec[] = "\"$name\" $spec";
             $newCols[]     = "\"$name\"";
         }
@@ -75,7 +76,8 @@ class DropUnusedFieldsTask extends BuildTask
             "COMMIT"
         );
 
-        foreach ($queries as $query)
+        foreach ($queries as $query) {
             DB::query($query.';');
+        }
     }
 }

@@ -46,7 +46,7 @@ class DeployTask extends BuildTask
             if (defined('DEPLOY_STAGING_GROUP')) {
                 $group = DEPLOY_STAGING_GROUP;
             }
-        } else if ($target == 'live') {
+        } elseif ($target == 'live') {
             if (!defined('DEPLOY_LIVE_TARGET')) {
                 $this->out('Missing constant. Please define DEPLOY_LIVE_TARGET in your _ss_environment');
                 exit();

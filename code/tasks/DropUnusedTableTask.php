@@ -61,7 +61,7 @@ class DropUnusedTableTask extends BuildTask
         }
     }
 
-    static function removeFromArray($val, &$arr)
+    public static function removeFromArray($val, &$arr)
     {
         if (($key = array_search($val, $arr)) !== false) {
             unset($arr[$key]);
