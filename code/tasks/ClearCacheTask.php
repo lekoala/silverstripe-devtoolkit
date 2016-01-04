@@ -21,7 +21,7 @@ class ClearCacheTask extends BuildTask
             RecursiveIteratorIterator::CHILD_FIRST);
         foreach ($ri as $file) {
             echo "Deleting " . $file . '<br/>';
-            if($file->isFile()) {
+            if ($file->isFile()) {
                 unlink($file);
             }
         }

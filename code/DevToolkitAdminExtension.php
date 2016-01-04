@@ -10,7 +10,6 @@ class DevToolkitAdminExtension extends DataExtension
 
     public function updateEditForm(CMSForm &$form)
     {
-
         $fields = $form->Fields();
 
         $class = $this->owner->modelClass;
@@ -23,7 +22,6 @@ class DevToolkitAdminExtension extends DataExtension
         // If we have the bulk manager, enable by default
         if (class_exists('GridFieldBulkManager')) {
             if ($o->hasMethod('bulkManagerDisable') && $o->bulkManagerDisable) {
-
             } else {
                 $config->addComponent($bulkManager = new GridFieldBulkManager());
 
@@ -44,7 +42,6 @@ class DevToolkitAdminExtension extends DataExtension
 
         // If we have the export all button (form-extras module), enable
         if (class_exists('GridFieldExportAllButton')) {
-
             $config->addComponent(new GridFieldExportAllButton('before'));
         }
 

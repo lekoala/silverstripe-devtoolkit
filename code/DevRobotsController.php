@@ -12,7 +12,7 @@ class DevRobotsController extends Controller
     public function index()
     {
         $robots = BASE_PATH . '/robots.txt';
-        if(is_file($robots)) {
+        if (is_file($robots)) {
             echo file_get_contents($robots);
             exit();
         }
@@ -20,8 +20,7 @@ class DevRobotsController extends Controller
             echo "User-agent: *
 Disallow: /";
             exit();
-        }
-        else {
+        } else {
             echo "User-agent: *
 Disallow: /admin
 Disallow: /?flush

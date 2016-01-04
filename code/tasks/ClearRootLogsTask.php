@@ -18,7 +18,7 @@ class ClearRootLogsTask extends BuildTask
         $di = new FilesystemIterator($folder,
             FilesystemIterator::SKIP_DOTS);
         foreach ($di as $file) {
-            if($file->getExtension() == 'log') {
+            if ($file->getExtension() == 'log') {
                 echo "Removing " . $file->getFilename() . '<br/>';
                 unlink($file);
             }

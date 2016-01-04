@@ -479,7 +479,7 @@ class Mysqldump
         );
         $columns->setFetchMode(PDO::FETCH_ASSOC);
 
-        foreach($columns as $key => $col) {
+        foreach ($columns as $key => $col) {
             $types = $this->typeAdapter->parseColumnType($col);
             $columnTypes[$col['Field']] = array(
                 'is_numeric'=> $types['is_numeric'],
@@ -541,7 +541,6 @@ class Mysqldump
             );
             return;
         }
-
     }
 
 
@@ -630,7 +629,7 @@ class Mysqldump
      *
      * @return null
      */
-    function prepareListValues($tableName)
+    public function prepareListValues($tableName)
     {
         if (!$this->dumpSettings['skip-comments']) {
             $this->compressManager->write(
@@ -678,7 +677,7 @@ class Mysqldump
      *
      * @return null
      */
-    function endListValues($tableName)
+    public function endListValues($tableName)
     {
         if ($this->dumpSettings['disable-keys']) {
             $this->compressManager->write(
@@ -719,13 +718,13 @@ class Mysqldump
      *
      * @return string SQL sentence with columns
      */
-    function getColumnStmt($tableName)
+    public function getColumnStmt($tableName)
     {
         $colStmt = array();
-        foreach($this->tableColumnTypes[$tableName] as $colName => $colType) {
+        foreach ($this->tableColumnTypes[$tableName] as $colName => $colType) {
             if ($colType['type'] == 'bit' && $this->dumpSettings['hex-blob']) {
                 $colStmt[] = "LPAD(HEX(`${colName}`),2,'0') AS `${colName}`";
-            } else if ($colType['is_blob'] && $this->dumpSettings['hex-blob']) {
+            } elseif ($colType['is_blob'] && $this->dumpSettings['hex-blob']) {
                 $colStmt[] = "HEX(`${colName}`) AS `${colName}`";
             } else {
                 $colStmt[] = "`${colName}`";
@@ -1144,7 +1143,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
         )
     );
 
-    public function __construct ($dbHandler)
+    public function __construct($dbHandler)
     {
         $this->dbHandler = $dbHandler;
     }
@@ -1208,7 +1207,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
     {
         $ret = "";
         if (!isset($row['Create View'])) {
-                throw new Exception("Error getting view structure, unknown output");
+            throw new Exception("Error getting view structure, unknown output");
         }
 
         $triggerStmt = $row['Create View'];
@@ -1257,7 +1256,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
             "*/ /*!50003 TRIGGER",
             $triggerStmtReplaced
         );
-        if ( false === $triggerStmtReplaced ) {
+        if (false === $triggerStmtReplaced) {
             $triggerStmtReplaced = $triggerStmt;
         }
 
@@ -1341,7 +1340,6 @@ class TypeAdapterMysql extends TypeAdapterFactory
         //$tableName = $args[0];
         //return "LOCK TABLES `$tableName` READ LOCAL";
         return $this->dbHandler->exec("LOCK TABLES `${args[0]}` READ LOCAL");
-
     }
 
     public function unlock_table()
@@ -1398,7 +1396,7 @@ class TypeAdapterMysql extends TypeAdapterFactory
     public function add_drop_database()
     {
         if (func_num_args() != 1) {
-             return "";
+            return "";
         }
 
         $args = func_get_args();
@@ -1466,14 +1464,11 @@ class TypeAdapterMysql extends TypeAdapterFactory
         $colInfo = array();
         $colParts = explode(" ", $colType['Type']);
 
-        if($fparen = strpos($colParts[0], "("))
-        {
+        if ($fparen = strpos($colParts[0], "(")) {
             $colInfo['type'] = substr($colParts[0], 0, $fparen);
             $colInfo['length']  = str_replace(")", "", substr($colParts[0], $fparen+1));
-            $colInfo['attributes'] = isset($colParts[1]) ? $colParts[1] : NULL;
-        }
-        else
-        {
+            $colInfo['attributes'] = isset($colParts[1]) ? $colParts[1] : null;
+        } else {
             $colInfo['type'] = $colParts[0];
         }
         $colInfo['is_numeric'] = in_array($colInfo['type'], $this->mysqlTypes['numerical']);

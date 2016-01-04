@@ -13,7 +13,7 @@ class RemoveInvalidPagesTask extends BuildTask
     {
         $classes = ClassInfo::subclassesFor('SiteTree');
 
-        $classes = array_map(function($item) {
+        $classes = array_map(function ($item) {
             return "'$item'";
         }, $classes);
 

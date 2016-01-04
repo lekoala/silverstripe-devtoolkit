@@ -54,7 +54,7 @@ class SlugExtension extends DataExtension
             $filter = new URLSegmentFilter;
 
             $oldSlug = $this->owner->Slug;
-            $newSlug = substr($filter->filter($slug),0,140);
+            $newSlug = substr($filter->filter($slug), 0, 140);
 
             $this->owner->Slug = $newSlug;
 
@@ -79,7 +79,6 @@ class SlugExtension extends DataExtension
 
             // store history
             if ($oldSlug && $oldSlug != $this->owner->Slug) {
-
                 $count = SlugHistory::check($class, $oldSlug, $this->owner->ID);
                 if ($count) {
                     // it already exists, no need to add twice
@@ -123,14 +122,13 @@ class SlugExtension extends DataExtension
         if (!$this->owner->Slug && $this->owner->ID) {
             if ($this->canWriteSlug()) {
                 $this->owner->write();
-            }
-            else {
+            } else {
                 return '';
             }
         }
         $page = $this->owner->Page();
-        if(is_string($page)) {
-            return rtrim($page,'/') . '/' . $this->owner->Slug;
+        if (is_string($page)) {
+            return rtrim($page, '/') . '/' . $this->owner->Slug;
         }
         if (!$page) {
             if (Controller::has_curr()) {

@@ -8,7 +8,7 @@
 class MediumPasswordValidator extends PasswordValidator
 {
 
-    function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->minLength(6);
@@ -16,7 +16,8 @@ class MediumPasswordValidator extends PasswordValidator
         $this->characterStrength(2, array("uppercase", "digits"));
     }
 
-    static function applyToMember() {
+    public static function applyToMember()
+    {
         Member::set_password_validator(new MediumPasswordValidator);
     }
 }
