@@ -140,17 +140,22 @@ class ActiveLocalesExtension extends DataExtension
         $data   = array();
         $config = SiteConfig::current_site_config();
         $list   = $config->ActiveLocales;
+        $ctrl   = null;
+        if (Controller::has_curr()) {
+            $ctrl = Controller::curr();
+        }
         if (!$list) {
-            if (Controller::has_curr()) {
-                $ctrl = Controller::curr();
-                if ($ctrl->hasMethod('Locales')) {
-                    return $ctrl->Locales();
-                }
+            if ($ctrl && $ctrl->hasMethod('Locales')) {
+                return $ctrl->Locales();
             }
             return $config->Locales();
         }
         foreach (explode(',', $list) as $locale) {
-            $data[] = $this->owner->LocaleInformation($locale);
+            if ($ctrl) {
+                $data[] = $ctrl->LocaleInformation($locale);
+            } else {
+                $data[] = $this->owner->LocaleInformation($locale);
+            }
         }
         return new ArrayList($data);
     }
