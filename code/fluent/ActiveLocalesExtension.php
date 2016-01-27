@@ -151,7 +151,7 @@ class ActiveLocalesExtension extends DataExtension
             return $config->Locales();
         }
         foreach (explode(',', $list) as $locale) {
-            if ($ctrl) {
+            if ($ctrl && $ctrl->hasMethod('LocaleInformation')) {
                 $data[] = $ctrl->LocaleInformation($locale);
             } else {
                 $data[] = $this->owner->LocaleInformation($locale);
