@@ -12,6 +12,9 @@ ini_set('error_log', Director::baseFolder().'/error.log');
 SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/silverstripe.log'),
     SS_Log::INFO, '<=');
 
+// Set a cache (disabled in dev mode anyway)
+HTTP::set_cache_age(60 * 30); // 30 min
+
 // Configure according to environment
 if (Director::isDev()) {
     // Display all errors
@@ -43,9 +46,13 @@ if (Director::isDev()) {
     // In production, sanitize php environment to avoid leaking information
     ini_set('display_errors', false);
 
+    // Hide where are included files
+    Config::inst()->update('SSViewer', 'source_file_comments', false);
+
     // Warn admin if errors occur
     SS_Log::add_writer(new SS_LogEmailWriter(Email::config()->admin_email),
         SS_Log::ERR, '<=');
+
 
     // Prevent errors when Kint is called
     require_once(__DIR__.'/code/KintLiveShorthands.php');
@@ -116,6 +123,6 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
 }
 
 // Really basic newrelic integration
-if(defined('NEWRELIC_APP_NAME')) {
-    newrelic_set_appname(NEWRELIC_APP_NAME . ";Silverstripe");
+if (defined('NEWRELIC_APP_NAME')) {
+    newrelic_set_appname(NEWRELIC_APP_NAME.";Silverstripe");
 }
