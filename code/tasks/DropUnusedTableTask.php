@@ -3,23 +3,25 @@
 /**
  * DropUnusedTableTask
  *
- * Silverstripe never delete your tables. Be careful if your database has other tables than Silverstripe!
- * 
+ * SilverStripe never delete your tables. Be careful if your database has other tables than SilverStripe!
+ *
  * @author lekoala
  */
 class DropUnusedTableTask extends BuildTask
 {
     protected $title       = "Drop Unused Tables";
-    protected $description = 'Drop unused tables from your db. Warning ! this is not bulletproof but should cover most cases.';
+    protected $description = 'Drop unused tables from your db by comparing current database tables with your dataobjects.';
 
     public function run($request)
     {
+        $conn     = DB::getConn();
         $classes  = ClassInfo::subclassesFor('DataObject');
-        $dbTables = DB::query(DB::getConn()->allTablesSQL())->column();
+        $dbTables = $conn->tableList();
 
         $go = $request->getVar('go');
         if (!$go) {
-            DB::alteration_message('Set ?go=1 to really delete the tables');
+            echo('Set ?go=1 to really delete the tables');
+            echo('<hr/>');
         }
 
         //make all lowercase
@@ -53,7 +55,7 @@ class DropUnusedTableTask extends BuildTask
         //at this point, we should only have orphans table in dbTables var
         foreach ($dbTablesLc as $i => $table) {
             if ($go) {
-                DB::query('DROP TABLE `'.$table . '`');
+                DB::query('DROP TABLE `'.$table.'`');
                 DB::alteration_message("Dropped $table", 'obsolete');
             } else {
                 DB::alteration_message("Would drop $table", 'obsolete');

@@ -3,23 +3,34 @@
 /**
  * DropUnusedFieldsTask
  *
- * Silverstripe never delete a field, so your tables become messy
- * 
+ * SilverStripe never delete a field, so your tables become messy
+ *
  * @author lekoala
  */
 class DropUnusedFieldsTask extends BuildTask
 {
     protected $title       = "Drop Unused Fields";
-    protected $description = 'Drop unused fields from your tables. At each run, remove all obsolete and rename fields to obsolete. Run twice to clean all fields.';
+    protected $description = 'Drop unused fields from your tables by comparing current database fields with your dataobjects.';
 
     public function run($request)
     {
-        increase_time_limit_to();
+        increase_time_limit_to(); // This can be a time consuming task
 
         $classes = ClassInfo::dataClassesFor('DataObject');
         $conn    = DB::getConn();
 
+        $go = $request->getVar('go');
+        if (!$go) {
+            echo('Set ?go=1 to really delete the fields');
+            echo('<hr/>');
+        }
+
         foreach ($classes as $class) {
+            $hasTable = ClassInfo::hasTable($class);
+            if (!$hasTable) {
+                continue;
+            }
+
             $fields = $class::database_fields($class);
             $list   = $conn->fieldList($class);
 
@@ -27,13 +38,16 @@ class DropUnusedFieldsTask extends BuildTask
                 if ($fieldName == 'ID') {
                     continue;
                 }
-                if (strpos($fieldName, '_obsolete_') === 0) {
-                    $this->dropColumns($class, array($fieldName));
-                    DB::alteration_message("Dropped $fieldName for $class", "obsolete");
-                    continue;
-                }
                 if (!isset($fields[$fieldName])) {
-                    $conn->dontRequireField($class, $fieldName);
+                    if ($go) {
+                        $this->dropColumns($class, array($fieldName));
+                        DB::alteration_message("Dropped $fieldName for $class",
+                            "obsolete");
+                    } else {
+                        DB::alteration_message("Would drop $fieldName for $class",
+                            "obsolete");
+                    }
+                    continue;
                 }
             }
         }
