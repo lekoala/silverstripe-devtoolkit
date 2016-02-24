@@ -14,6 +14,9 @@ class DropUnusedTableTask extends BuildTask
 
     public function run($request)
     {
+        HTTP::set_cache_age(0);
+        increase_time_limit_to(); // This can be a time consuming task
+
         $conn     = DB::getConn();
         $classes  = ClassInfo::subclassesFor('DataObject');
         $dbTables = $conn->tableList();
@@ -26,6 +29,10 @@ class DropUnusedTableTask extends BuildTask
 
         //make all lowercase
         $dbTablesLc = array_map('strtolower', $dbTables);
+        $dbTablesMap = array();
+        foreach($dbTables as $k => $v) {
+            $dbTablesMap[strtolower($v)] = $v;
+        }
 
         foreach ($classes as $class) {
             if (ClassInfo::hasTable($class)) {
@@ -53,7 +60,8 @@ class DropUnusedTableTask extends BuildTask
         }
 
         //at this point, we should only have orphans table in dbTables var
-        foreach ($dbTablesLc as $i => $table) {
+        foreach ($dbTablesLc as $i => $lcTable) {
+            $table = $dbTablesMap[$lcTable];
             if ($go) {
                 DB::query('DROP TABLE `'.$table.'`');
                 DB::alteration_message("Dropped $table", 'obsolete');

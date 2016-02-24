@@ -14,6 +14,7 @@ class DropUnusedFieldsTask extends BuildTask
 
     public function run($request)
     {
+        HTTP::set_cache_age(0);
         increase_time_limit_to(); // This can be a time consuming task
 
         $classes = ClassInfo::dataClassesFor('DataObject');
