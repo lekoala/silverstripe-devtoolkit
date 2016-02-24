@@ -8,6 +8,9 @@ if(!isset($_GET['file'])) {
 	if(SS_ENVIRONMENT_TYPE != 'dev') {
 		die('You must be in dev mode to use Adminer');
 	}
+	if(defined('ADMINER_DISABLED') && ADMINER_DISABLED) {
+		die('Adminer is disabled in the configuration');
+	}
 }
 /** Adminer - Compact database management
 * @link https://www.adminer.org/
