@@ -5,7 +5,7 @@
  *
  * @author LeKoala <thomas@lekoala.be>
  */
-class RemoveSpacesFromFilenames extends BuildTask
+class RemoveSpacesFromFilenamesTask extends BuildTask
 {
     protected $title = "Remove spaces from files in /assets";
 
