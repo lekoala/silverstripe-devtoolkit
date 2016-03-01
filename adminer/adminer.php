@@ -2,15 +2,20 @@
 /** Adminer for SilverStripe - Source code has been modified so do not replace blindly */
 if(!isset($_GET['file'])) {
 	require dirname(dirname(__DIR__)) . '/framework/core/Constants.php';
-	if(!defined('SS_ENVIRONMENT_TYPE')) {
-		die('You must have the constant SS_ENVIRONMENT_TYPE defined and set to dev');
+	if(defined('ADMINER_ACCESS')) {
+		if(!ADMINER_ACCESS) {
+			die('Adminer is disabled in the configuration');
+		}
 	}
-	if(SS_ENVIRONMENT_TYPE != 'dev') {
-		die('You must be in dev mode to use Adminer');
+	else {
+		if(!defined('SS_ENVIRONMENT_TYPE')) {
+			die('You must have the constant SS_ENVIRONMENT_TYPE defined and set to dev');
+		}
+		if(SS_ENVIRONMENT_TYPE != 'dev') {
+			die('You must be in dev mode to use Adminer');
+		}
 	}
-	if(defined('ADMINER_DISABLED') && ADMINER_DISABLED) {
-		die('Adminer is disabled in the configuration');
-	}
+	
 }
 /** Adminer - Compact database management
 * @link https://www.adminer.org/
