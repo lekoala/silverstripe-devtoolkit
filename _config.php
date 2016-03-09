@@ -13,7 +13,8 @@ SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/silverstripe.lo
     SS_Log::INFO, '<=');
 
 // Set a cache (disabled in dev mode anyway)
-HTTP::set_cache_age(60 * 30); // 30 min
+//HTTP::set_cache_age(60 * 30); // 30 min
+//Might be better to add this to "Page::init"
 
 // Configure according to environment
 if (Director::isDev()) {
