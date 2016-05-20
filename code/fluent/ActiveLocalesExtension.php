@@ -150,7 +150,11 @@ class ActiveLocalesExtension extends DataExtension
             }
             return $config->Locales();
         }
+        $validLocales = Fluent::locales();
         foreach (explode(',', $list) as $locale) {
+            if(!in_array($locale, $validLocales)) {
+                continue;
+            }
             if ($ctrl && $ctrl->hasMethod('LocaleInformation')) {
                 $data[] = $ctrl->LocaleInformation($locale);
             } else {
