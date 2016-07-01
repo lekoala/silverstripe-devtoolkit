@@ -137,11 +137,11 @@ class SlugExtension extends DataExtension
             }
             return '';
         }
-        if (class_exists('Subsite')) {
-          
-            // On frontend, we might display object from other subsites
+        if (class_exists('Subsite') && Subsite::currentSubsiteID()) {
+            // On frontend, we might display objects from other subsites
             if ($this->owner->SubsiteID != Subsite::currentSubsiteID()) {
-                $url = $page->AbsoluteLink() . 'detail/'.$this->owner->Slug;
+                $link = $page->AbsoluteLink();
+                $url = $link . 'detail/'.$this->owner->Slug;
                 // Make sure we have the right url
                 $url = str_replace(Subsite::currentSubsite()->domain(), $this->owner->Subsite()->domain(), $url);
                 return $url;
