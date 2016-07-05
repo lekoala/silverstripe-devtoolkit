@@ -141,14 +141,11 @@ class SlugExtension extends DataExtension
             // On frontend, we might display objects from other subsites
             if ($this->owner->SubsiteID != Subsite::currentSubsiteID()) {
                 $link = $page->AbsoluteLink();
-                $url = $link . 'detail/'.$this->owner->Slug;
-                // Make sure we have the right url
-                $url = str_replace(Subsite::currentSubsite()->domain(), $this->owner->Subsite()->domain(), $url);
-                return $url;
+                return $link.'detail/'.$this->owner->Slug;
             }
             // In the cms and with subsite, we might need to use absolute link
             if (Controller::has_curr() && Controller::curr() instanceof LeftAndMain) {
-                return $page->AbsoluteLink() . 'detail/'.$this->owner->Slug;
+                return $page->AbsoluteLink().'detail/'.$this->owner->Slug;
             }
         }
         return $page->Link('detail/'.$this->owner->Slug);
