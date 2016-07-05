@@ -138,6 +138,10 @@ class SlugExtension extends DataExtension
             return '';
         }
         if (class_exists('Subsite') && Subsite::currentSubsiteID()) {
+            $spage = $this->owner->SubsitePage();
+            if ($spage) {
+                $page = $spage;
+            }
             // On frontend, we might display objects from other subsites
             if ($this->owner->SubsiteID != Subsite::currentSubsiteID()) {
                 $link = $page->AbsoluteLink();
