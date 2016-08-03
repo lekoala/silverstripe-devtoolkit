@@ -10,7 +10,7 @@ class FakeRecordGenerator
     protected static $latitude    = 50.7802;
     protected static $longitude   = 4.4269;
     protected static $avatarsPath = 'resources/avatars';
-    protected static $imageRss    = 'http://backend.deviantart.com/rss.xml?q=boost%3Apopular+meta%3Aall+max_age%3A24h&type=deviation';
+    protected static $imageRss    = 'https://unsplash.com/rss';
     protected static $firstNames  = array(
         'Caecilius', 'Quintus', 'Horatius', 'Flaccus', 'Clodius',
         'Metellus', 'Flavius', 'Hortensius', 'Julius', 'Decimus', 'Gaius'
@@ -218,16 +218,16 @@ class FakeRecordGenerator
         if (!count($images)) {
             $rss   = file_get_contents(self::$imageRss);
             $xml   = simplexml_load_string($rss);
-            $nodes = $xml->xpath("//media:content");
+            $nodes = $xml->xpath("//image");
             $i     = 0;
 
             $folder = Folder::find_or_make('Faker');
             $dir    = $folder->getFullPath();
+            $filter = new FileNameFilter;
             foreach ($nodes as $node) {
                 $i++;
-                $image    = file_get_contents($node['url']);
-                $filename = $dir.'/'.basename($node['url']);
-
+                $image    = file_get_contents((string) $node->url);
+                $filename = $dir.'/'.basename($filter->filter((string) $node->title) . '.jpg');
                 file_put_contents($filename, $image);
             }
             $folder->syncChildren();
