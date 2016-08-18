@@ -15,7 +15,6 @@ SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/silverstripe.lo
 // Set a cache (disabled in dev mode anyway)
 //HTTP::set_cache_age(60 * 30); // 30 min
 //Might be better to add this to "Page::init"
-
 // Configure according to environment
 if (Director::isDev()) {
     // Display all errors
@@ -99,7 +98,9 @@ if (defined('DEVTOOLKIT_USE_APC') && DEVTOOLKIT_USE_APC) {
 }
 if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
     // Note : this use the Memcache extension, not the Memcached extension
-    // (with a d - which use libmemcached)
+    // (with a 'd' - which use libmemcached)
+    // Install from https://pecl.php.net/package/memcache
+    // For windows : https://mnshankar.wordpress.com/2011/03/25/memcached-on-64-bit-windows/
     SS_Cache::add_backend('two_level', 'Two-Levels',
         array(
         'slow_backend' => 'File',
@@ -109,8 +110,8 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
         ),
         'fast_backend_options' => array(
             'servers' => array(
-                'host' => 'localhost',
-                'port' => 11211,
+                'host' => defined('MEMCACHE_HOST') ? MEMCACHE_HOST : 'localhost',
+                'port' => defined('MEMCACHE_PORT') ? MEMCACHE_PORT : 11211,
                 'persistent' => true,
                 'weight' => 1,
                 'timeout' => 5,
