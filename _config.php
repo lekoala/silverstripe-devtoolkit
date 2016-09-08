@@ -3,6 +3,9 @@ if (!defined('DEVTOOLKIT_PATH')) {
     define('DEVTOOLKIT_PATH', rtrim(basename(dirname(__FILE__))));
 }
 
+// Ignore jpeg warnings
+ini_set('gd.jpeg_ignore_warning', 1);
+
 // Use _ss_environment.php, otherwise Director::isDev won't work properly
 // See sample _ss_environment file in /ressources folder
 require_once('conf/ConfigureFromEnv.php');
