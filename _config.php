@@ -42,9 +42,6 @@ if (Director::isDev()) {
     if (isset($_GET['flush'])) {
         i18n::get_cache()->clean(Zend_Cache::CLEANING_MODE_ALL);
     }
-
-    // Include Kint
-    require_once(__DIR__.'/code/thirdparty/Kint/Kint.class.php');
 } else {
     // In production, sanitize php environment to avoid leaking information
     ini_set('display_errors', false);
@@ -55,10 +52,6 @@ if (Director::isDev()) {
     // Warn admin if errors occur
     SS_Log::add_writer(new SS_LogEmailWriter(Email::config()->admin_email),
         SS_Log::ERR, '<=');
-
-
-    // Prevent errors when Kint is called
-    require_once(__DIR__.'/code/KintLiveShorthands.php');
 }
 
 // Protect website if env = isTest
