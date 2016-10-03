@@ -32,6 +32,8 @@ class DropUnusedFieldsTask extends BuildTask
                 continue;
             }
 
+            $toDrop = array();
+
             $fields = $class::database_fields($class);
             $list   = $conn->fieldList($class);
 
@@ -40,16 +42,21 @@ class DropUnusedFieldsTask extends BuildTask
                     continue;
                 }
                 if (!isset($fields[$fieldName])) {
-                    if ($go) {
-                        $this->dropColumns($class, array($fieldName));
-                        DB::alteration_message("Dropped $fieldName for $class",
-                            "obsolete");
-                    } else {
-                        DB::alteration_message("Would drop $fieldName for $class",
-                            "obsolete");
-                    }
-                    continue;
+                    $toDrop[] = $fieldName;
                 }
+            }
+
+            if(empty($toDrop)) {
+                continue;
+            }
+
+            if ($go) {
+                $this->dropColumns($class, $toDrop);
+                DB::alteration_message("Dropped ".implode(',',$toDrop)." for $class",
+                    "obsolete");
+            } else {
+                DB::alteration_message("Would drop ".implode(',',$toDrop)." for $class",
+                    "obsolete");
             }
         }
     }
