@@ -19,7 +19,7 @@ if(!isset($_GET['file'])) {
 			die('You must be in dev mode to use Adminer');
 		}
 		// In dev mode, allow autologin by default
-		if(!defined('ADMINER_AUTOLOGIN')) {
+		if(!defined('ADMINER_AUTOLOGIN') && $_SERVER['REMOTE_ADDR'] == '127.0.0.1') {
 			define('ADMINER_AUTOLOGIN',true);
 		}
 	}
