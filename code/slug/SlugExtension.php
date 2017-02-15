@@ -172,6 +172,7 @@ class SlugExtension extends DataExtension
         if ($excludeID) {
             $datalist = $datalist->exclude('ID', $excludeID);
         }
+        $datalist = $datalist->setDataQueryParam('Subsite.filter', false);
         $record = $datalist->first();
         if ((!$record || !$record->exists()) && $checkHistory) {
             $historyRecord = SlugHistory::getRecordByClass($class, $slug,
