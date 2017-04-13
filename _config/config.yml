@@ -17,6 +17,12 @@ Director:
   rules:
     'devtoolkitassets': 'DevToolkitAssetsController'
     'robots.txt': 'DevRobotsController'
+    '__deploy': 'DeployController'
+DeployController:
+  # Replace with a secure key
+  key: ''
+  # Whitelisted servers
+  ip_whitelist: []
 LeftAndMain:
   extensions:
     - DevToolkitLeftAndMainExtension
