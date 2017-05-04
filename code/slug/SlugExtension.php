@@ -23,6 +23,13 @@ class SlugExtension extends DataExtension
     {
         parent::onAfterWrite();
 
+        // Do not attempt to generate a slug if not using default locale and that slug is not localized
+        if(class_exists('Fluent')) {
+            if(Fluent::current_locale() != Fluent::default_locale()) {
+                return;
+            }
+        }
+
         $class  = $this->ownerBaseClass;
         $config = Config::inst()->forClass($class);
 
