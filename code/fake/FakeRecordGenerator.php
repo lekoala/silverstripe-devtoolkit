@@ -7,42 +7,43 @@
  */
 class FakeRecordGenerator
 {
-    protected static $latitude    = 50.7802;
-    protected static $longitude   = 4.4269;
-    protected static $avatarsPath = 'resources/avatars';
-    protected static $imageRss    = 'https://unsplash.com/rss';
-    protected static $firstNames  = array(
+
+    protected static $folder = 'Faker';
+    protected static $latitude = 50.7802;
+    protected static $longitude = 4.4269;
+    protected static $imageRss = 'https://unsplash.com/rss';
+    protected static $firstNames = [
         'Caecilius', 'Quintus', 'Horatius', 'Flaccus', 'Clodius',
         'Metellus', 'Flavius', 'Hortensius', 'Julius', 'Decimus', 'Gaius'
-    );
-    protected static $lastNames   = array(
+    ];
+    protected static $lastNames = [
         'Gracchus', 'Antonius', 'Brutus', 'Cassius', 'Casca', 'Lepidus',
         'Crassus', 'Cinna'
-    );
-    protected static $addresses   = array(
-        array('Address' => '4880 Glory Rd', 'City' => 'Ponchatoula', 'Postcode' => 'LA 70454',
-            'Country' => 'US'),
-        array('Address' => '4363 Willow Oaks Lane', 'City' => 'Harrison Township',
-            'Postcode' => 'NJ 08062', 'Country' => 'US'),
-        array('Address' => '3471 Chipmunk Ln', 'City' => 'Clifton Heights', 'Postcode' => 'PA 19018 ‎',
-            'Country' => 'US'),
-        array('Address' => '666 Koala Ln', 'City' => 'Mt Laurel', 'Postcode' => 'NJ 08054‎',
-            'Country' => 'US'),
-        array('Address' => '3339 Little Acres Ln', 'City' => 'Woodford', 'Postcode' => 'VA 22580',
-            'Country' => 'US'),
-        array('Address' => '15 Anthony Avenue', 'City' => 'Essex', 'Postcode' => 'MD 21221',
-            'Country' => 'US'),
-        array('Address' => '2942 Kelly Ave', 'City' => 'Baltimore', 'Postcode' => 'MD 21209',
-            'Country' => 'US'),
-        array('Address' => '687 Burke Rd', 'City' => 'Delta', 'Postcode' => 'PA 17314',
-            'Country' => 'US'),
-        array('Address' => '1196 Court St', 'City' => 'York', 'Postcode' => 'PA 17404 ‎',
-            'Country' => 'US'),
-        array('Address' => 'Barnes St', 'City' => 'Bel Air', 'Postcode' => 'MD 21014',
-            'Country' => 'US'),
-    );
-    protected static $domains     = array('perdu.com', 'silverstripe.org', 'google.be');
-    protected static $words       = array(
+    ];
+    protected static $addresses = [
+        ['Address' => '4880 Glory Rd', 'City' => 'Ponchatoula', 'Postcode' => 'LA 70454',
+            'Country' => 'US'],
+        ['Address' => '4363 Willow Oaks Lane', 'City' => 'Harrison Township',
+            'Postcode' => 'NJ 08062', 'Country' => 'US'],
+        ['Address' => '3471 Chipmunk Ln', 'City' => 'Clifton Heights', 'Postcode' => 'PA 19018 ‎',
+            'Country' => 'US'],
+        ['Address' => '666 Koala Ln', 'City' => 'Mt Laurel', 'Postcode' => 'NJ 08054‎',
+            'Country' => 'US'],
+        ['Address' => '3339 Little Acres Ln', 'City' => 'Woodford', 'Postcode' => 'VA 22580',
+            'Country' => 'US'],
+        ['Address' => '15 Anthony Avenue', 'City' => 'Essex', 'Postcode' => 'MD 21221',
+            'Country' => 'US'],
+        ['Address' => '2942 Kelly Ave', 'City' => 'Baltimore', 'Postcode' => 'MD 21209',
+            'Country' => 'US'],
+        ['Address' => '687 Burke Rd', 'City' => 'Delta', 'Postcode' => 'PA 17314',
+            'Country' => 'US'],
+        ['Address' => '1196 Court St', 'City' => 'York', 'Postcode' => 'PA 17404 ‎',
+            'Country' => 'US'],
+        ['Address' => 'Barnes St', 'City' => 'Bel Air', 'Postcode' => 'MD 21014',
+            'Country' => 'US'],
+    ];
+    protected static $domains = ['perdu.com', 'silverstripe.org', 'google.be'];
+    protected static $words = [
         'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing',
         'elit', 'curabitur', 'vel', 'hendrerit', 'libero', 'eleifend',
         'blandit', 'nunc', 'ornare', 'odio', 'ut', 'orci',
@@ -75,10 +76,11 @@ class FakeRecordGenerator
         'habitant', 'senectus', 'netus', 'fames', 'quisque',
         'euismod', 'curabitur', 'lectus', 'elementum', 'tempor',
         'risus', 'cras'
-    );
+    ];
 
     /**
      * A random firstname
+     *
      * @return string
      */
     public static function firstname()
@@ -88,6 +90,7 @@ class FakeRecordGenerator
 
     /**
      * A random lastname
+     *
      * @return string
      */
     public static function lastname()
@@ -97,15 +100,27 @@ class FakeRecordGenerator
 
     /**
      * A random name
+     *
      * @return string
      */
     public static function name()
     {
-        return self::firstname().' '.self::lastname();
+        return self::firstname() . ' ' . self::lastname();
+    }
+
+    /**
+     * A random boolean
+     *
+     * @return bool
+     */
+    public static function boolean()
+    {
+        return rand(0, 1) == 1;
     }
 
     /**
      * A random address
+     *
      * @return string
      */
     public static function address()
@@ -113,7 +128,15 @@ class FakeRecordGenerator
         return self::$addresses[array_rand(self::$addresses)];
     }
 
-    protected static function fprand($intMin, $intMax, $intDecimals)
+    /**
+     * Random float point value
+     *
+     * @param int $intMin
+     * @param int $intMax
+     * @param int $intDecimals
+     * @return float
+     */
+    public static function fprand($intMin, $intMax, $intDecimals)
     {
         if ($intDecimals) {
             $intPowerTen = pow(10, $intDecimals);
@@ -131,8 +154,7 @@ class FakeRecordGenerator
      * @param int $radius
      * @return array
      */
-    public static function latLon($latitude = null, $longitude = null,
-                                  $radius = 20)
+    public static function latLon($latitude = null, $longitude = null, $radius = 20)
     {
         if ($latitude === null) {
             $latitude = self::$latitude;
@@ -146,9 +168,9 @@ class FakeRecordGenerator
         $lat_max = $latitude + ($radius / 69);
 
         $rand = self::fprand(0, ($lng_max - $lng_min), 3);
-        $lng  = $lng_min + $rand;
+        $lng = $lng_min + $rand;
         $rand = self::fprand(0, ($lat_max - $lat_min), 3);
-        $lat  = $lat_min + $rand;
+        $lat = $lat_min + $rand;
 
         return compact('lat', 'lng', 'lng_min', 'lat_min', 'lng_max', 'lat_max');
     }
@@ -164,74 +186,104 @@ class FakeRecordGenerator
 
     /**
      * A random website
+     *
      * @return string
      */
     public static function website()
     {
-        return 'http://www'.self::domain();
+        return 'http://www' . self::domain();
+    }
+
+    public static function adorableAvatar($size = 200, $id = null)
+    {
+        if (!$id) {
+            $id = uniqid();
+        }
+        $result = file_get_contents('https://api.adorable.io/avatars/' . $size . '/' . $id);
+
+        return self::storeFakeImage($result, $id . '.png', 'Adorable');
     }
 
     /**
-     * A random avatar
-     * @param type $gender
-     * @return type
+     * Generate some random users
+     *
+     * @link https://randomuser.me/documentation
+     * @param array $params
+     * @param bool $useDefaultParams
+     * @return array
      */
-    public static function avatar($gender = null)
+    public static function randomUser($params = [], $useDefaultParams = true)
     {
-        $images = DataObject::get('Image', "Filename LIKE 'assets/Avatars/%'");
+        $defaultParams = [
+            'results' => '20',
+            'password' => 'upper,lower,8-12',
+            'nat' => 'fr,us,gb,de',
+        ];
 
-        // If no avatars copy the default ones
-        if (!$images->count()) {
-            $path          = Director::baseFolder().'/devtoolkit/'.self::$avatarsPath;
-            $folder        = Folder::find_or_make('Avatars');
-            $folderFemales = Folder::find_or_make('Avatars/Females');
-            $folderMales   = Folder::find_or_make('Avatars/Males');
-            $dir           = $folder->getFullPath();
-            $files         = glob($path.'/*.png');
-            foreach ($files as $file) {
-                $file_to_go = str_replace("devtoolkit/images/".self::$avatarsPath,
-                    "assets/Avatars", $file);
-                copy($file, $file_to_go);
-            }
-            $folder->syncChildren();
-            $images = DataObject::get('Image',
-                    "Filename LIKE 'assets/Avatars/%'");
+        if ($useDefaultParams) {
+            $params = array_merge($defaultParams, $params);
+        }
+        $result = file_get_contents('https://randomuser.me/api/?' . http_build_query($params));
+
+        $data = json_decode($result, JSON_OBJECT_AS_ARRAY);
+
+        if (!empty($data['error'])) {
+            throw new Exception($data['error']);
         }
 
-        $genders = array('Females', 'Males');
-        if (!$gender) {
-            $gender = $genders[array_rand($genders)];
-        }
+        return $data['results'];
+    }
 
-        $images = DataObject::get('Image',
-                "Filename LIKE 'assets/Avatars/{$gender}/%'")->sort('RAND()');
-        return $images->First();
+    /**
+     * Store a fake image
+     *
+     * @param string $data
+     * @param string $name
+     * @param string $folder
+     * @return Image
+     */
+    public static function storeFakeImage($data, $name, $folder)
+    {
+        $filter = new FileNameFilter;
+        $name = $filter->filter($name);
+
+        $folderName = self::$folder . '/' . $folder;
+        $folderPath = BASE_PATH . '/assets/' . $folderName;
+        $filename = $folderPath . '/' . $name;
+        $folderInst = Folder::find_or_make($folderName);
+        file_put_contents($filename, $data);
+        $folderInst->syncChildren();
+
+        return Image::find($folderName . '/' . $name);
     }
 
     /**
      * Get a random image
+     *
+     * Images are generated only once, if folder does not exists in assets
+     *
      * @return Image
      */
     public static function image()
     {
-        $images = DataObject::get('Image', "Filename LIKE 'assets/Faker/%'");
+        $images = DataObject::get('Image', "Filename LIKE 'assets/Faker/Images%'");
         if (!count($images)) {
-            $rss   = file_get_contents(self::$imageRss);
-            $xml   = simplexml_load_string($rss);
+            $rss = file_get_contents(self::$imageRss);
+            $xml = simplexml_load_string($rss);
             $nodes = $xml->xpath("//image");
-            $i     = 0;
+            $i = 0;
 
-            $folder = Folder::find_or_make('Faker');
-            $dir    = $folder->getFullPath();
+            $folder = Folder::find_or_make(self::$folder . '/Images');
+            $dir = $folder->getFullPath();
             $filter = new FileNameFilter;
             foreach ($nodes as $node) {
                 $i++;
-                $image    = file_get_contents((string) $node->url);
-                $filename = $dir.'/'.basename($filter->filter((string) $node->title) . '.jpg');
+                $image = file_get_contents((string) $node->url);
+                $filename = $dir . '/' . basename($filter->filter((string) $node->title) . '.jpg');
                 file_put_contents($filename, $image);
             }
             $folder->syncChildren();
-            $images = DataObject::get('Image', "Filename LIKE 'assets/Faker/%'");
+            $images = DataObject::get('Image', "Filename LIKE 'assets/Faker/Images%'");
         }
         $rand = rand(0, count($images));
         foreach ($images as $key => $image) {
@@ -243,18 +295,35 @@ class FakeRecordGenerator
     }
 
     /**
+     * Get a random record
+     *
+     * @param string $class
+     * @param array $filters
+     * @return DataObject
+     */
+    public static function record($class, $filters = [])
+    {
+        $q = $class::get()->sort('RAND()');
+        if (!empty($filters)) {
+            $q = $q->filter($filters);
+        }
+        return $q->first();
+    }
+
+    /**
      * Get random words
+     *
      * @param int $num
      * @param int $num2
      * @return string
      */
     public static function words($num, $num2 = null)
     {
-        $res   = array();
-        $i     = 0;
+        $res = [];
+        $i = 0;
         $total = $num;
         if ($num2 !== null) {
-            $i     = rand(0, $num);
+            $i = rand(0, $num);
             $total = $num2;
         }
         $req = $total - $i;
@@ -266,17 +335,18 @@ class FakeRecordGenerator
 
     /**
      * Get random sentences
+     *
      * @param int $num
      * @param int $num2
      * @return string
      */
     public static function sentences($num, $num2 = null)
     {
-        $res   = array();
-        $i     = 0;
+        $res = [];
+        $i = 0;
         $total = $num;
         if ($num2 !== null) {
-            $i     = rand(0, $num);
+            $i = rand(0, $num);
             $total = $num2;
         }
         $req = $total - $i;
@@ -288,28 +358,30 @@ class FakeRecordGenerator
 
     /**
      * Get random paragraphs
+     *
      * @param int $num
      * @param int $num2
      * @return string
      */
     public static function paragraphs($num, $num2 = null)
     {
-        $res   = array();
-        $i     = 0;
+        $res = [];
+        $i = 0;
         $total = $num;
         if ($num2 !== null) {
-            $i     = rand(0, $num);
+            $i = rand(0, $num);
             $total = $num2;
         }
         $req = $total - $i;
         while ($req--) {
-            $res[] = "<p>".self::sentences(3, 7)."</p>";
+            $res[] = "<p>" . self::sentences(3, 7) . "</p>";
         }
         return implode("\n", $res);
     }
 
     /**
      * Get a date between two dates
+     *
      * @param string $num
      * @param string $num2
      * @param string $format
@@ -327,6 +399,22 @@ class FakeRecordGenerator
         return date($format, $rand);
     }
 
+    /**
+     * Male or female
+     *
+     * @return string
+     */
+    public static function male_or_female()
+    {
+        return self::pick(['male', 'female']);
+    }
+
+    /**
+     * Randomly pick in an array
+     *
+     * @param array $arr
+     * @return array
+     */
     public static function pick(array $arr)
     {
         return $arr[array_rand($arr)];
@@ -334,6 +422,7 @@ class FakeRecordGenerator
 
     /**
      * Get a list of countries
+     *
      * @param string $locale
      * @return array
      */
@@ -344,13 +433,13 @@ class FakeRecordGenerator
         }
         $countries = Zend_Locale::getTranslationList('territory', $locale, 2);
         asort($countries, SORT_LOCALE_STRING);
-        unset($countries['SU'], $countries['ZZ'], $countries['VD'],
-            $countries['DD']);
+        unset($countries['SU'], $countries['ZZ'], $countries['VD'], $countries['DD']);
         return $countries;
     }
 
     /**
      * Get a random country
+     *
      * @return string
      */
     public static function country()
@@ -361,6 +450,7 @@ class FakeRecordGenerator
 
     /**
      * Get a random country code
+     *
      * @return string
      */
     public static function countryCode()
