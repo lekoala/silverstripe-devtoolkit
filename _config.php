@@ -23,6 +23,11 @@ if (Director::isDev()) {
     // Display all errors
     error_reporting(-1);
 
+    // SS3.6 and PHP7 still have some issue
+    if ((float) phpversion() >= 7) {
+        error_reporting(E_ALL ^ E_DEPRECATED);
+    }
+
     // Add a debug logger
     SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/debug.log'),
         SS_Log::DEBUG, '=');
