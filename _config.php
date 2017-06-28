@@ -11,9 +11,8 @@ ini_set('gd.jpeg_ignore_warning', 1);
 require_once('conf/ConfigureFromEnv.php');
 
 // Define logging - don't forget to disable access to log files in htaccess, see ressources folder for sample htaccess
-ini_set('error_log', Director::baseFolder().'/error.log');
-SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/silverstripe.log'),
-    SS_Log::INFO, '<=');
+ini_set('error_log', Director::baseFolder() . '/error.log');
+SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder() . '/silverstripe.log'), SS_Log::INFO, '<=');
 
 // Set a cache (disabled in dev mode anyway)
 //HTTP::set_cache_age(60 * 30); // 30 min
@@ -29,8 +28,7 @@ if (Director::isDev()) {
     }
 
     // Add a debug logger
-    SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder().'/debug.log'),
-        SS_Log::DEBUG, '=');
+    SS_Log::add_writer(new SS_LogFileWriter(Director::baseFolder() . '/debug.log'), SS_Log::DEBUG, '=');
 
     // Send emails to admin
     Email::send_all_emails_to(Email::config()->admin_email);
@@ -40,8 +38,12 @@ if (Director::isDev()) {
         DynamicCache::config()->enabled = false;
     }
 
-    // See where are included files
-    Config::inst()->update('SSViewer', 'source_file_comments', true);
+    // See where are included files except if FileAttachmentField is used
+    if (class_exists('FileAttachmentField')) {
+        Config::inst()->update('SSViewer', 'source_file_comments', false);
+    } else {
+        Config::inst()->update('SSViewer', 'source_file_comments', true);
+    }
 
     // Fix this issue https://github.com/silverstripe/silverstripe-framework/issues/4146
     if (isset($_GET['flush'])) {
@@ -55,20 +57,16 @@ if (Director::isDev()) {
     Config::inst()->update('SSViewer', 'source_file_comments', false);
 
     // Warn admin if errors occur
-    SS_Log::add_writer(new SS_LogEmailWriter(Email::config()->admin_email),
-        SS_Log::ERR, '<=');
+    SS_Log::add_writer(new SS_LogEmailWriter(Email::config()->admin_email), SS_Log::ERR, '<=');
 }
 
 // Protect website if env = isTest
 if (Director::isTest()) {
     // If php runs under cgi, Http auth might not work by default. Don't forget to update htaccess
     if (!isset($_SERVER['PHP_AUTH_USER'])) {
-        if (isset($_SERVER['HTTP_AUTHORIZATION']) && (strlen($_SERVER['HTTP_AUTHORIZATION'])
-            > 0)) {
-            list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':',
-                base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
-            if (strlen($_SERVER['PHP_AUTH_USER']) == 0 || strlen($_SERVER['PHP_AUTH_PW'])
-                == 0) {
+        if (isset($_SERVER['HTTP_AUTHORIZATION']) && (strlen($_SERVER['HTTP_AUTHORIZATION']) > 0)) {
+            list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
+            if (strlen($_SERVER['PHP_AUTH_USER']) == 0 || strlen($_SERVER['PHP_AUTH_PW']) == 0) {
                 unset($_SERVER['PHP_AUTH_USER']);
                 unset($_SERVER['PHP_AUTH_PW']);
             }
@@ -87,8 +85,7 @@ if (class_exists('CodeEditorField')) {
 }
 
 if (defined('DEVTOOLKIT_USE_APC') && DEVTOOLKIT_USE_APC) {
-    SS_Cache::add_backend('two_level', 'Two-Levels',
-        array(
+    SS_Cache::add_backend('two_level', 'Two-Levels', array(
         'slow_backend' => 'File',
         'fast_backend' => 'APC',
         'slow_backend_options' => array(
@@ -102,8 +99,7 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
     // (with a 'd' - which use libmemcached)
     // Install from https://pecl.php.net/package/memcache
     // For windows : https://mnshankar.wordpress.com/2011/03/25/memcached-on-64-bit-windows/
-    SS_Cache::add_backend('two_level', 'Two-Levels',
-        array(
+    SS_Cache::add_backend('two_level', 'Two-Levels', array(
         'slow_backend' => 'File',
         'fast_backend' => 'Memcached',
         'slow_backend_options' => array(
@@ -127,5 +123,5 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
 
 // Really basic newrelic integration
 if (defined('NEWRELIC_APP_NAME')) {
-    newrelic_set_appname(NEWRELIC_APP_NAME.";Silverstripe");
+    newrelic_set_appname(NEWRELIC_APP_NAME . ";Silverstripe");
 }
