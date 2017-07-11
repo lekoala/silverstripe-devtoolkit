@@ -39,7 +39,7 @@ if (Director::isDev()) {
     }
 
     // See where are included files except if FileAttachmentField is used
-    if (class_exists('FileAttachmentField')) {
+    if (class_exists('FileAttachmentField') || Director::is_ajax()) {
         Config::inst()->update('SSViewer', 'source_file_comments', false);
     } else {
         Config::inst()->update('SSViewer', 'source_file_comments', true);
