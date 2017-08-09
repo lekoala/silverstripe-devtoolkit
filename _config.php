@@ -122,6 +122,6 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
 }
 
 // Really basic newrelic integration
-if (defined('NEWRELIC_APP_NAME')) {
+if (defined('NEWRELIC_APP_NAME') && function_exists('newrelic_set_appname')) {
     newrelic_set_appname(NEWRELIC_APP_NAME . ";Silverstripe");
 }
