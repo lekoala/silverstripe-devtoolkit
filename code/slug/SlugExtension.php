@@ -196,10 +196,12 @@ class SlugExtension extends DataExtension
         $link = Director::absoluteURL($this->owner->Link());
         $view = _t('SlugExtension.OPEN', 'Open');
         $actions->push(
-            new BetterButtonNewWindowLink(
+            $bb = new BetterButtonLink(
             $view, $link
             )
         );
+
+        $bb->newWindow();
     }
 
     public function updateCMSFields(FieldList $fields)
