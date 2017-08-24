@@ -12,25 +12,39 @@
  */
 class SlugExtension extends DataExtension
 {
-    private static $db      = array(
+
+    private static $db = array(
         'Slug' => 'Varchar(150)',
     );
     private static $indexes = array(
         'Slug' => true,
     );
 
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        if (!$this->owner->Slug && $this->canWriteSlug()) {
+            $this->writeSlug(false, false);
+        }
+    }
+
     public function onAfterWrite()
     {
         parent::onAfterWrite();
 
-        // Do not attempt to generate a slug if not using default locale and that slug is not localized
-        if(class_exists('Fluent')) {
-            if(Fluent::current_locale() != Fluent::default_locale()) {
-                return;
-            }
-        }
+        $this->writeSlug();
+    }
 
-        $class  = $this->ownerBaseClass;
+    /**
+     *
+     * @param boolean $write
+     * @param boolean $storeOld
+     * @return string
+     */
+    public function writeSlug($write = true, $storeOld = true)
+    {
+        $class = $this->ownerBaseClass;
         $config = Config::inst()->forClass($class);
 
         // look for fields to use in slug
@@ -38,6 +52,7 @@ class SlugExtension extends DataExtension
         if ($config->slug_fields) {
             $fields = $config->slug_fields;
         }
+        // If a field is changed, recompute the slug
         $needSlug = false;
         foreach ($fields as $field) {
             if ($this->owner->isChanged($field, 2)) {
@@ -45,17 +60,23 @@ class SlugExtension extends DataExtension
                 break;
             }
         }
+        // Do not attempt to generate a slug if not using default locale and that slug is not localized
+        if (class_exists('Fluent')) {
+            if (Fluent::current_locale() != Fluent::default_locale()) {
+                $needSlug = false;
+            }
+        }
+        // If there is no slug, we need one
         if (!$this->owner->Slug) {
             $needSlug = true;
         }
-
-        // if we need a slug, compute it
+        // If we need a slug, compute it
         if ($needSlug && $this->owner->ID) {
             $slug = '';
             foreach ($fields as $field) {
-                $slug .= ' '.$this->owner->$field;
+                $slug .= ' ' . $this->owner->$field;
             }
-            $slug     = trim($slug);
+            $slug = trim($slug);
             $baseSlug = $slug;
 
             $filter = new URLSegmentFilter;
@@ -66,40 +87,43 @@ class SlugExtension extends DataExtension
             $this->owner->Slug = $newSlug;
 
             // check for existing slugs
-            $count  = 0;
+            $count = 0;
             $record = self::getBySlug($class, $newSlug, $this->owner->ID);
             while ($record && $record->exists()) {
                 $count++;
-                $slug              = $baseSlug.'-'.$count;
-                $newSlug           = $filter->filter($slug);
+                $slug = $baseSlug . '-' . $count;
+                $newSlug = $filter->filter($slug);
                 $this->owner->Slug = $newSlug;
-                $record            = self::getBySlug($class, $newSlug,
-                        $this->owner->ID);
+                $record = self::getBySlug($class, $newSlug, $this->owner->ID);
             }
 
             // prevent infinite loop because of onAfterWrite called multiple times
             if ($oldSlug == $newSlug) {
-                return;
+                return $this->owner->Slug;
             }
 
-            $this->owner->write();
+            if ($write) {
+                $this->owner->write();
+            }
 
             // store history
-            if ($oldSlug && $oldSlug != $this->owner->Slug) {
+            if ($storeOld && $oldSlug && $oldSlug != $this->owner->Slug) {
                 $count = SlugHistory::check($class, $oldSlug, $this->owner->ID);
                 if ($count) {
                     // it already exists, no need to add twice
-                    return;
+                    return $this->owner->Slug;
                 }
 
                 SlugHistory::recordFromObject($this->owner, $oldSlug);
             }
         }
+
+        return $this->owner->Slug;
     }
 
     public function canWriteSlug()
     {
-        $class  = $this->ownerBaseClass;
+        $class = $this->ownerBaseClass;
         $config = Config::inst()->forClass($class);
 
         // look for fields to use in slug
@@ -136,11 +160,11 @@ class SlugExtension extends DataExtension
         /* @var $page Page */
         $page = $this->owner->Page();
         if (is_string($page)) {
-            return rtrim($page, '/').'/'.$this->owner->Slug;
+            return rtrim($page, '/') . '/' . $this->owner->Slug;
         }
         if (!$page) {
             if (Controller::has_curr()) {
-                return Controller::curr()->Link('detail/'.$this->owner->Slug);
+                return Controller::curr()->Link('detail/' . $this->owner->Slug);
             }
             return '';
         }
@@ -152,14 +176,14 @@ class SlugExtension extends DataExtension
             // On frontend, we might display objects from other subsites
             if ($this->owner->SubsiteID != Subsite::currentSubsiteID()) {
                 $link = $page->AbsoluteLink();
-                return $link.'detail/'.$this->owner->Slug;
+                return $link . 'detail/' . $this->owner->Slug;
             }
             // In the cms and with subsite, we might need to use absolute link
             if (Controller::has_curr() && Controller::curr() instanceof LeftAndMain) {
-                return $page->AbsoluteLink().'detail/'.$this->owner->Slug;
+                return $page->AbsoluteLink() . 'detail/' . $this->owner->Slug;
             }
         }
-        return $page->Link('detail/'.$this->owner->Slug);
+        return $page->Link('detail/' . $this->owner->Slug);
     }
 
     /**
@@ -171,8 +195,7 @@ class SlugExtension extends DataExtension
      * @param bool $checkHistory
      * @return DataObject
      */
-    public static function getBySlug($class, $slug, $excludeID = null,
-                                     $checkHistory = true)
+    public static function getBySlug($class, $slug, $excludeID = null, $checkHistory = true)
     {
         /* @var $datalist DataList */
         $datalist = $class::get()->filter('Slug', $slug);
@@ -182,8 +205,7 @@ class SlugExtension extends DataExtension
         $datalist = $datalist->setDataQueryParam('Subsite.filter', false);
         $record = $datalist->first();
         if ((!$record || !$record->exists()) && $checkHistory) {
-            $historyRecord = SlugHistory::getRecordByClass($class, $slug,
-                    $excludeID);
+            $historyRecord = SlugHistory::getRecordByClass($class, $slug, $excludeID);
             if ($historyRecord) {
                 $record = $historyRecord;
             }
