@@ -2,6 +2,8 @@
 
 /**
  * Adds an "Fast Export" button to the bottom of a {@link GridField}.
+ * 
+ * It performs a raw query on the table instead of trying to iterate over a list of objects
  */
 class FastExportButton implements
     GridField_HTMLProvider,
@@ -189,8 +191,6 @@ class FastExportButton implements
         $class = $gridField->getModelClass();
         $columns = ($this->exportColumns) ? $this->exportColumns : self::exportFieldsForClass($class);
         $fileData = '';
-
-        d($columns);
 
         $singl = singleton($class);
 

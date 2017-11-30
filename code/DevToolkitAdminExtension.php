@@ -39,7 +39,7 @@ class DevToolkitAdminExtension extends DataExtension
         }
 
         // Add a fast export button
-        if($o->canView()) {
+        if(Permission::check('ADMIN')) {
             $config->addComponent(new FastExportButton('buttons-before-left'));
         }
        
