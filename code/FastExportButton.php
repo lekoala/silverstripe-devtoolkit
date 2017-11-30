@@ -155,9 +155,17 @@ class FastExportButton implements
         $fields = array();
         foreach ($dataClasses as $dataClass) {
             $databaseFields = DataObject::database_fields($dataClass);
+
+            $dataFields = [];
+            foreach ($databaseFields as $name => $type) {
+                if ($type == 'Text' || $type == 'HTMLText') {
+                    continue;
+                }
+                $dataFields[] = $name;
+            }
             $fields = array_merge(
                 $fields,
-                array_keys($databaseFields)
+                $dataFields
             );
         }
         return array_combine($fields, $fields);
@@ -192,6 +200,11 @@ class FastExportButton implements
         $columns = ($this->exportColumns) ? $this->exportColumns : self::exportFieldsForClass($class);
         $fileData = '';
 
+        // If we don't have an associative array
+        if(!ArrayLib::is_associative($columns)) {
+            array_combine($columns, $columns);
+        }
+
         $singl = singleton($class);
 
         $singular = $class ? $singl->i18n_singular_name() : '';
@@ -209,18 +222,40 @@ class FastExportButton implements
 
         $class = $gridField->getModelClass();
         $singl = singleton($class);
-        $table = $singl->baseTable();
+        $baseTable = $singl->baseTable();
 
         $stream = fopen('data://text/plain,' . "", 'w+');
 
         // Filter columns
         $sqlFields = [];
+        $baseFields =['ID','Created','LastEdited'];
+
+        $joins = [];
         foreach ($columns as $columnSource => $columnHeader) {
-            $table = ClassInfo::table_for_object_field($class, $columnSource);
-            if($table == 'DataObject' || !$table) {
+            if(in_array($columnSource, $baseFields)) {
+                $sqlFields[] = $baseTable . '.' . $columnSource;
+                continue;
+            }
+            // Naive join support
+            if(strpos($columnSource, '.') !== false) {
+                $parts = explode('.', $columnSource);
+
+                $joinSingl = singleton($parts[0]);
+                $joinBaseTable = $joinSingl->baseTable();
+
+                if(!isset($joins[$joinBaseTable])) {
+                    $joins[$joinBaseTable] = [];
+                }
+                $joins[$joinBaseTable][] = $parts[1];
+
+                $sqlFields[] = $joinBaseTable . '.' . $parts[1];
+                continue;
+            }
+            $fieldTable = ClassInfo::table_for_object_field($class, $columnSource);
+            if ($fieldTable != $baseTable || !$fieldTable) {
                 unset($columns[$columnSource]);
             } else {
-                $sqlFields[] = $table . '.' . $columnSource;
+                $sqlFields[] = $fieldTable . '.' . $columnSource;
             }
         }
 
@@ -237,7 +272,15 @@ class FastExportButton implements
             fputcsv($stream, array_values($headers), $separator);
         }
 
-        $sql = 'SELECT ' . implode(',', $sqlFields) . ' FROM ' . $table;
+        if (empty($sqlFields)) {
+            $sqlFields = ['ID', 'Created', 'LastEdited'];
+        }
+
+        $sql = 'SELECT ' . implode(',', $sqlFields) . ' FROM ' . $baseTable;
+        foreach($joins as $joinTable => $joinFields) {
+            $foreignKey = $joinTable . 'ID';
+            $sql .= ' LEFT JOIN ' . $joinTable . ' ON ' . $joinTable . '.ID = ' . $baseTable . '.' . $foreignKey;
+        }
         $query = DB::query($sql);
 
         foreach ($query as $row) {
