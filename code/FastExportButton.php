@@ -201,7 +201,7 @@ class FastExportButton implements
         $fileData = '';
 
         // If we don't have an associative array
-        if(!ArrayLib::is_associative($columns)) {
+        if (!ArrayLib::is_associative($columns)) {
             array_combine($columns, $columns);
         }
 
@@ -228,22 +228,26 @@ class FastExportButton implements
 
         // Filter columns
         $sqlFields = [];
-        $baseFields =['ID','Created','LastEdited'];
+        $baseFields = ['ID', 'Created', 'LastEdited'];
 
         $joins = [];
+        $isSubsite = false;
         foreach ($columns as $columnSource => $columnHeader) {
-            if(in_array($columnSource, $baseFields)) {
+            if($columnSource == 'SubsiteID') {
+                $isSubsite = true;
+            }
+            if (in_array($columnSource, $baseFields)) {
                 $sqlFields[] = $baseTable . '.' . $columnSource;
                 continue;
             }
             // Naive join support
-            if(strpos($columnSource, '.') !== false) {
+            if (strpos($columnSource, '.') !== false) {
                 $parts = explode('.', $columnSource);
 
                 $joinSingl = singleton($parts[0]);
                 $joinBaseTable = $joinSingl->baseTable();
 
-                if(!isset($joins[$joinBaseTable])) {
+                if (!isset($joins[$joinBaseTable])) {
                     $joins[$joinBaseTable] = [];
                 }
                 $joins[$joinBaseTable][] = $parts[1];
@@ -277,9 +281,13 @@ class FastExportButton implements
         }
 
         $sql = 'SELECT ' . implode(',', $sqlFields) . ' FROM ' . $baseTable;
-        foreach($joins as $joinTable => $joinFields) {
+        foreach ($joins as $joinTable => $joinFields) {
             $foreignKey = $joinTable . 'ID';
             $sql .= ' LEFT JOIN ' . $joinTable . ' ON ' . $joinTable . '.ID = ' . $baseTable . '.' . $foreignKey;
+        }
+        // Basic subsite support
+        if($isSubsite && class_exists('Subsite') && Subsite::currentSubsiteID()) {
+            $sql .= ' WHERE ' . $baseTable . '.SubsiteID = ' . Subsite::currentSubsiteID();
         }
         $query = DB::query($sql);
 
