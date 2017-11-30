@@ -37,5 +37,11 @@ class DevToolkitAdminExtension extends DataExtension
                 }
             }
         }
+
+        // Add a fast export button
+        if($o->canView()) {
+            $config->addComponent(new FastExportButton('buttons-before-left'));
+        }
+       
     }
 }
