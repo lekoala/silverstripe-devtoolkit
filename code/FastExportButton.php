@@ -232,8 +232,16 @@ class FastExportButton implements
 
         $joins = [];
         $isSubsite = false;
+        $map = [];
+        if($singl->hasMethod('fastExportMap')) {
+            $map = $singl->fastExportMap();
+        }
         foreach ($columns as $columnSource => $columnHeader) {
-            if($columnSource == 'SubsiteID') {
+            // Allow mapping methods to plain fields
+            if($map && isset($map[$columnSource])) {
+                $columnSource = $map[$columnSource];
+            }
+            if ($columnSource == 'SubsiteID') {
                 $isSubsite = true;
             }
             if (in_array($columnSource, $baseFields)) {
@@ -280,15 +288,24 @@ class FastExportButton implements
             $sqlFields = ['ID', 'Created', 'LastEdited'];
         }
 
+        $where = [];
         $sql = 'SELECT ' . implode(',', $sqlFields) . ' FROM ' . $baseTable;
         foreach ($joins as $joinTable => $joinFields) {
             $foreignKey = $joinTable . 'ID';
             $sql .= ' LEFT JOIN ' . $joinTable . ' ON ' . $joinTable . '.ID = ' . $baseTable . '.' . $foreignKey;
         }
         // Basic subsite support
-        if($isSubsite && class_exists('Subsite') && Subsite::currentSubsiteID()) {
-            $sql .= ' WHERE ' . $baseTable . '.SubsiteID = ' . Subsite::currentSubsiteID();
+        if ($isSubsite && class_exists('Subsite') && Subsite::currentSubsiteID()) {
+            $where[] = $baseTable . '.SubsiteID = ' . Subsite::currentSubsiteID();
         }
+
+        $singl->extend('updateFastExport', $sql, $where);
+
+        // Basic where clause
+        if (!empty($where)) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
+        }
+
         $query = DB::query($sql);
 
         foreach ($query as $row) {
