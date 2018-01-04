@@ -118,8 +118,7 @@ class FastExportButton implements
         $actionName,
         $arguments,
         $data
-    )
-    {
+    ) {
         if (in_array($actionName, $this->getActions($gridField))) {
             return $this->handleExport($gridField);
         }
@@ -233,12 +232,13 @@ class FastExportButton implements
         $joins = [];
         $isSubsite = false;
         $map = [];
-        if($singl->hasMethod('fastExportMap')) {
+        if ($singl->hasMethod('fastExportMap')) {
             $map = $singl->fastExportMap();
         }
+        d($columns, $map);
         foreach ($columns as $columnSource => $columnHeader) {
             // Allow mapping methods to plain fields
-            if($map && isset($map[$columnSource])) {
+            if ($map && isset($map[$columnSource])) {
                 $columnSource = $map[$columnSource];
             }
             if ($columnSource == 'SubsiteID') {
@@ -274,6 +274,7 @@ class FastExportButton implements
         if ($this->hasHeader) {
             $headers = array();
 
+            d($columns);
             // determine the headers. If a field is callable (e.g. anonymous function) then use the
             // source name as the header instead
             foreach ($columns as $columnSource => $columnHeader) {
@@ -281,7 +282,11 @@ class FastExportButton implements
                     ? $columnSource : $columnHeader;
             }
 
-            fputcsv($stream, array_values($headers), $separator);
+            $row = array_values($headers);
+            // fputcsv($stream, $row, $separator);
+
+             // force quotes
+             fputs($stream, implode(",", array_map("self::encodeFunc", $row)) . "\r\n");
         }
 
         if (empty($sqlFields)) {
@@ -309,7 +314,10 @@ class FastExportButton implements
         $query = DB::query($sql);
 
         foreach ($query as $row) {
-            fputcsv($stream, $row, $separator);
+            // fputcsv($stream, $row, $separator);
+
+            // force quotes
+            fputs($stream, implode(",", array_map("self::encodeFunc", $row)) . "\r\n");
         }
 
         rewind($stream);
@@ -317,6 +325,16 @@ class FastExportButton implements
         fclose($stream);
 
         return $fileData;
+    }
+
+    public static function encodeFunc($value)
+    {
+        ///remove any ESCAPED double quotes within string.
+        $value = str_replace('\\"', '"', $value);
+        //then force escape these same double quotes And Any UNESCAPED Ones.
+        $value = str_replace('"', '\"', $value);
+        //force wrap value in quotes and return
+        return '"' . $value . '"';
     }
 
     /**
