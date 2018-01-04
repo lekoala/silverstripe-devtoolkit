@@ -235,7 +235,6 @@ class FastExportButton implements
         if ($singl->hasMethod('fastExportMap')) {
             $map = $singl->fastExportMap();
         }
-        d($columns, $map);
         foreach ($columns as $columnSource => $columnHeader) {
             // Allow mapping methods to plain fields
             if ($map && isset($map[$columnSource])) {
@@ -274,7 +273,6 @@ class FastExportButton implements
         if ($this->hasHeader) {
             $headers = array();
 
-            d($columns);
             // determine the headers. If a field is callable (e.g. anonymous function) then use the
             // source name as the header instead
             foreach ($columns as $columnSource => $columnHeader) {
