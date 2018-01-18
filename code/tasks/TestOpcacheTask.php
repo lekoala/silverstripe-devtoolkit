@@ -27,8 +27,8 @@ class TestOpcacheTask extends BuildTask
         }
     }
 
-    protected function msg($msg)
+    protected function msg($msg, $type = "")
     {
-        DB::alteration_message($msg);
+        DB::alteration_message($msg, $type);
     }
 }

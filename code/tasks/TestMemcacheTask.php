@@ -18,11 +18,11 @@ class TestMemcacheTask extends BuildTask
         $host = defined('MEMCACHE_HOST') ? MEMCACHE_HOST : 'localhost';
         $port = defined('MEMCACHE_PORT') ? MEMCACHE_PORT : 11211;
 
-        $memcache  = new Memcache;
+        $memcache = new Memcache;
         $connected = $memcache->connect($host, $port);
 
         if ($connected) {
-            $this->msg("Server's version: ".$memcache->getVersion());
+            $this->msg("Server's version: " . $memcache->getVersion());
 
             $result = $memcache->get("key");
 
@@ -30,12 +30,12 @@ class TestMemcacheTask extends BuildTask
                 $this->msg("Data found in cache");
             } else {
                 $this->msg("Data not found in cache");
-                $tmp_object           = new stdClass;
+                $tmp_object = new stdClass;
                 $tmp_object->str_attr = "test";
                 $tmp_object->int_attr = 123;
-                $tmp_object->time     = time();
-                $tmp_object->date     = date('Y-m-d H:i:s');
-                $tmp_object->arr      = array(1, 2, 3);
+                $tmp_object->time = time();
+                $tmp_object->date = date('Y-m-d H:i:s');
+                $tmp_object->arr = array(1, 2, 3);
                 $memcache->set("key", $tmp_object, false, 10);
             }
 
@@ -49,8 +49,8 @@ class TestMemcacheTask extends BuildTask
         }
     }
 
-    protected function msg($msg)
+    protected function msg($msg, $type = "")
     {
-        DB::alteration_message($msg);
+        DB::alteration_message($msg, $type);
     }
 }

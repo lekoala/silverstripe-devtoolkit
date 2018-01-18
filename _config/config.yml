@@ -17,6 +17,13 @@ AdminPasswordValidator:
     - 'digits'
     - 'punctuation'
   characters_count: 3
+DevelopmentAdmin:
+  registered_controllers:
+    fastbuild:
+      controller: 'FastBuildController'
+      links:
+        fastbuild: 'Fast building of the database'
+        'fastbuild/regenclassmanifest': 'Regenerate the class manifest'
 # A smarter global partial key
 SSViewer:
   global_key: '$CurrentReadingMode, $ContentLocale, $SiteConfig.ID'
