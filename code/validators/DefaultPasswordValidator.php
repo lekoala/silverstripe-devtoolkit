@@ -34,6 +34,6 @@ class DefaultPasswordValidator extends PasswordValidator
     public static function applyToMember()
     {
         $class = get_called_class();
-        Member::set_password_validator($class);
+        Member::set_password_validator(new $class);
     }
 }
