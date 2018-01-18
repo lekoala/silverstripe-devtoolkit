@@ -4,6 +4,19 @@ After:
   - 'framework/*'
   - 'cms/*'
 ---
+DefaultPasswordValidator:
+  min_length: 6
+  historical_passwords: 2
+  characters:
+    - 'digits'
+AdminPasswordValidator:
+  min_length: 10
+  characters:
+    - 'lowercase'
+    - 'uppercase'
+    - 'digits'
+    - 'punctuation'
+  characters_count: 3
 # A smarter global partial key
 SSViewer:
   global_key: '$CurrentReadingMode, $ContentLocale, $SiteConfig.ID'
