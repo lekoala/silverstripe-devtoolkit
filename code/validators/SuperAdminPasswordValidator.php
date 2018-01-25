@@ -1,13 +1,13 @@
 <?php
 
 /**
- * AdminPasswordValidator
+ * SuperAdminPasswordValidator
  * 
- * At least 10 characters and default rules
+ * At least 20 characters and default rules
  *
  * @author lekoala
  */
-class AdminPasswordValidator extends DefaultPasswordValidator
+class SuperAdminPasswordValidator extends DefaultPasswordValidator
 {
 
 }
