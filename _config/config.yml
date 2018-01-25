@@ -17,6 +17,14 @@ AdminPasswordValidator:
     - 'digits'
     - 'punctuation'
   characters_count: 3
+SuperAdminPasswordValidator:
+  min_length: 20
+  characters:
+    - 'lowercase'
+    - 'uppercase'
+    - 'digits'
+    - 'punctuation'
+  characters_count: 3
 DevelopmentAdmin:
   registered_controllers:
     fastbuild:
