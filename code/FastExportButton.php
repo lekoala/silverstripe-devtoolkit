@@ -284,7 +284,7 @@ class FastExportButton implements
             // fputcsv($stream, $row, $separator);
 
              // force quotes
-             fputs($stream, implode(",", array_map("self::encodeFunc", $row)) . "\r\n");
+             fputs($stream, implode(",", array_map("self::encodeFunc", $row)) . "\n");
         }
 
         if (empty($sqlFields)) {
@@ -315,7 +315,7 @@ class FastExportButton implements
             // fputcsv($stream, $row, $separator);
 
             // force quotes
-            fputs($stream, implode(",", array_map("self::encodeFunc", $row)) . "\r\n");
+            fputs($stream, implode(",", array_map("self::encodeFunc", $row)) . "\n");
         }
 
         rewind($stream);
