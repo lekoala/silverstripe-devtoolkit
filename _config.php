@@ -79,7 +79,10 @@ if (Director::isTest()) {
     }
     $allowedIps = ['127.0.0.1'];
     if (defined('ALLOWED_IPS')) {
-        $allowedIps = explode('|', ALLOWED_IPS);
+        $allowedIps = ALLOWED_IPS;
+        if (!is_array($allowedIps)) {
+            $allowedIps = explode('|', ALLOWED_IPS);
+        }
     }
     if (!in_array($ip, $allowedIps)) {
         BasicAuth::protect_entire_site();
