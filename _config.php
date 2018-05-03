@@ -23,7 +23,7 @@ if (Director::isDev()) {
     error_reporting(-1);
 
     // SS3.6 and PHP7 still have some issue
-    if ((float) phpversion() >= 7) {
+    if ((float)phpversion() >= 7) {
         error_reporting(E_ALL ^ E_DEPRECATED);
     }
 
@@ -72,7 +72,18 @@ if (Director::isTest()) {
             }
         }
     }
-    BasicAuth::protect_entire_site();
+
+    $ip = isset($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP'] : null;
+    if (!$ip && isset($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    $allowedIps = ['127.0.0.1'];
+    if (defined('ALLOWED_IPS')) {
+        $allowedIps = explode('|', ALLOWED_IPS);
+    }
+    if (!in_array($ip, $allowedIps)) {
+        BasicAuth::protect_entire_site();
+    }
 }
 
 // CodeEditorField integration
