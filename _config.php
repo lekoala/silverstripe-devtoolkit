@@ -94,7 +94,7 @@ if (defined('DEVTOOLKIT_USE_APC') && DEVTOOLKIT_USE_APC) {
     ));
     SS_Cache::pick_backend('two_level', 'any', 10);
 }
-if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
+if (defined('DEVTOOLKIT_USE_MEMCACHE') && DEVTOOLKIT_USE_MEMCACHE) {
     // Note : this use the Memcache extension, not the Memcached extension
     // (with a 'd' - which use libmemcached)
     // Install from https://pecl.php.net/package/memcache
@@ -109,6 +109,29 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
             'servers' => array(
                 'host' => defined('MEMCACHE_HOST') ? MEMCACHE_HOST : 'localhost',
                 'port' => defined('MEMCACHE_PORT') ? MEMCACHE_PORT : 11211,
+                'persistent' => true,
+                'weight' => 1,
+                'timeout' => 5,
+                'retry_interval' => 15,
+                'status' => true,
+                'failure_callback' => null
+            )
+        )
+    ));
+    SS_Cache::pick_backend('two_level', 'any', 10);
+}
+if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
+    // @link https://framework.zend.com/manual/1.11/en/zend.cache.backends.html
+    SS_Cache::add_backend('two_level', 'Two-Levels', array(
+        'slow_backend' => 'File',
+        'fast_backend' => 'Libmemcached',
+        'slow_backend_options' => array(
+            'cache_dir' => TEMP_FOLDER
+        ),
+        'fast_backend_options' => array(
+            'servers' => array(
+                'host' => defined('MEMCACHED_HOST') ? MEMCACHED_HOST : 'localhost',
+                'port' => defined('MEMCACHED_PORT') ? MEMCACHED_PORT : 11211,
                 'persistent' => true,
                 'weight' => 1,
                 'timeout' => 5,
