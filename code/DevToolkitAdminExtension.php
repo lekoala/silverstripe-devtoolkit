@@ -38,9 +38,10 @@ class DevToolkitAdminExtension extends DataExtension
             }
         }
 
-        // If we have the export all button (form-extras module), enable
-        if (class_exists('GridFieldExportAllButton')) {
-            $config->addComponent(new GridFieldExportAllButton('before'));
+        // Add a fast export button
+        if(Permission::check('ADMIN')) {
+            $config->addComponent(new FastExportButton('buttons-before-left'));
         }
+       
     }
 }

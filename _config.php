@@ -23,7 +23,7 @@ if (Director::isDev()) {
     error_reporting(-1);
 
     // SS3.6 and PHP7 still have some issue
-    if ((float) phpversion() >= 7) {
+    if ((float)phpversion() >= 7) {
         error_reporting(E_ALL ^ E_DEPRECATED);
     }
 
@@ -72,7 +72,21 @@ if (Director::isTest()) {
             }
         }
     }
-    BasicAuth::protect_entire_site();
+
+    $ip = isset($_SERVER['HTTP_X_REAL_IP']) ? $_SERVER['HTTP_X_REAL_IP'] : null;
+    if (!$ip && isset($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    $allowedIps = ['127.0.0.1'];
+    if (defined('ALLOWED_IPS')) {
+        $allowedIps = ALLOWED_IPS;
+        if (!is_array($allowedIps)) {
+            $allowedIps = explode('|', ALLOWED_IPS);
+        }
+    }
+    if (!in_array($ip, $allowedIps)) {
+        BasicAuth::protect_entire_site();
+    }
 }
 
 // CodeEditorField integration
@@ -145,6 +159,6 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
 }
 
 // Really basic newrelic integration
-if (defined('NEWRELIC_APP_NAME')) {
+if (defined('NEWRELIC_APP_NAME') && function_exists('newrelic_set_appname')) {
     newrelic_set_appname(NEWRELIC_APP_NAME . ";Silverstripe");
 }

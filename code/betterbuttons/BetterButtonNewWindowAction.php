@@ -8,6 +8,13 @@
 class BetterButtonNewWindowAction extends BetterButtonCustomAction
 {
 
+    public function __construct($actionName, $text, $redirectType = null)
+    {
+        parent::__construct($actionName, $text, $redirectType);
+
+        $this->setAttribute('target', '_blank');
+    }
+
     /**
      * Gets the HTML representing the button
      * @return string

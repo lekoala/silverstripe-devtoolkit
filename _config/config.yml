@@ -4,6 +4,34 @@ After:
   - 'framework/*'
   - 'cms/*'
 ---
+DefaultPasswordValidator:
+  min_length: 6
+  historical_passwords: 2
+  characters:
+    - 'digits'
+AdminPasswordValidator:
+  min_length: 10
+  characters:
+    - 'lowercase'
+    - 'uppercase'
+    - 'digits'
+    - 'punctuation'
+  characters_count: 3
+SuperAdminPasswordValidator:
+  min_length: 20
+  characters:
+    - 'lowercase'
+    - 'uppercase'
+    - 'digits'
+    - 'punctuation'
+  characters_count: 3
+DevelopmentAdmin:
+  registered_controllers:
+    fastbuild:
+      controller: 'FastBuildController'
+      links:
+        fastbuild: 'Fast building of the database'
+        'fastbuild/regenclassmanifest': 'Regenerate the class manifest'
 # A smarter global partial key
 SSViewer:
   global_key: '$CurrentReadingMode, $ContentLocale, $SiteConfig.ID'
