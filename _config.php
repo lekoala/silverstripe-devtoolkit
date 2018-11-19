@@ -146,8 +146,8 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
             'servers' => array(
                 'host' => defined('MEMCACHED_HOST') ? MEMCACHED_HOST : 'localhost',
                 'port' => defined('MEMCACHED_PORT') ? MEMCACHED_PORT : 11211,
-                'persistent' => true,
                 'weight' => 1,
+                'persistent' => true,
                 'timeout' => 5,
                 'retry_interval' => 15,
                 'status' => true,
@@ -161,4 +161,29 @@ if (defined('DEVTOOLKIT_USE_MEMCACHED') && DEVTOOLKIT_USE_MEMCACHED) {
 // Really basic newrelic integration
 if (defined('NEWRELIC_APP_NAME') && function_exists('newrelic_set_appname')) {
     newrelic_set_appname(NEWRELIC_APP_NAME . ";Silverstripe");
+}
+
+// Debugbar timeline helpers
+function debugbar_measure($name)
+{
+    if (Director::isLive()) {
+        return;
+    }
+    if (!class_exists('DebugBar')) {
+        return;
+    }
+    DebugBar::withDebugBar(function (DebugBar\DebugBar $debugbar) use ($name) {
+        /* @var $timeData DebugBar\DataCollector\TimeDataCollector */
+        $timeData = $debugbar['time'];
+        if (!$timeData) {
+            return;
+        }
+        if ($timeData->hasStartedMeasure($name)) {
+            $timeData->stopMeasure($name);
+        }
+        $timeData->startMeasure(
+            $name,
+            $name
+        );
+    });
 }
