@@ -179,11 +179,14 @@ function debugbar_measure($name)
             return;
         }
         if ($timeData->hasStartedMeasure($name)) {
+            // If it has started, stop it
             $timeData->stopMeasure($name);
+        } else {
+            // Or start it
+            $timeData->startMeasure(
+                $name,
+                $name
+            );
         }
-        $timeData->startMeasure(
-            $name,
-            $name
-        );
     });
 }
