@@ -1,25 +1,51 @@
 {
-	"name": "lekoala/silverstripe-devtoolkit",
-	"description": "Collection of useful developer stuff for Silverstripe",
-	"type": "silverstripe-module",
-	"keywords": ["silverstripe", "developer", "module", "cms"],
-	"license": "BSD-3-Clause",
-	"authors": [
-		{
-			"name": "LeKoala",
-			"email": "thomas@lekoala.be"
-		}
-	],
-	"require": {
-		"silverstripe/framework": "~3.1"
-	},
-	"suggest": {
-		"nathancox/codeeditorfield": "A good html editor for Silverstripe",
-		"jonom/silverstripe-betternavigator": "A good replacement for SilverstripeNavigator",
-		"unclecheese/betterbuttons": "ModelAdmin like it should be"
-	},
-	"extra": {
-		"installer-name": "devtoolkit"
-	}
-
+    "name": "lekoala/silverstripe-devtoolkit",
+    "description": "Collection of useful developer stuff for SilverStripe",
+    "type": "silverstripe-vendormodule",
+    "keywords": [
+        "silverstripe",
+        "developer",
+        "toolkit",
+        "module",
+        "cms"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "LeKoala",
+            "email": "thomas@lekoala.be"
+        }
+    ],
+    "require": {
+        "silverstripe/framework": "^4.3"
+    },
+    "require-dev": {
+        "sminnee/phpunit": "^5.7",
+        "squizlabs/php_codesniffer": "^2.3"
+    },
+    "suggest": {
+        "tractorcow/silverstripe-robots": "Robots.txt generation"
+    },
+    "autoload": {
+        "psr-4": {
+            "LeKoala\\DevToolkit\\": "src/",
+            "LeKoala\\DevToolkit\\Test\\": "tests/"
+        }
+    },
+    "extra": {
+        "installer-name": "devtoolkit",
+        "expose": [
+            "css"
+        ]
+    },
+    "support": {
+        "issues": "https://github.com/lekoala/silverstripe-devtoolkit/issues"
+    },
+    "scripts": {
+        "lint": "phpcs src/ tests/",
+        "lint-clean": "phpcbf src/ tests/",
+        "test": "phpunit -v"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

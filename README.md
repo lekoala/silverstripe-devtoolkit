@@ -1,41 +1,33 @@
-Silverstripe Devtoolkit module
-==================
+# SilverStripe Devtoolkit
+
+[![Build Status](https://travis-ci.com/lekoala/silverstripe-devtoolkit.svg?branch=master)](https://travis-ci.com/lekoala/silverstripe-devtoolkit/)
+[![scrutinizer](https://scrutinizer-ci.com/g/lekoala/silverstripe-devtoolkit/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-devtoolkit/)
+[![Code coverage](https://codecov.io/gh/lekoala/silverstripe-devtoolkit/branch/master/graph/badge.svg)](https://codecov.io/gh/lekoala/silverstripe-devtoolkit)
 
 A common set of dev tools and helpers for Silverstripe
 
-CMS (dev)
-==================
+## Improved Debug view
 
-- _ss_environment editable in siteconfig
-- extra buttons for model admin
+The BetterDebugView class provided clickable links to trace. It is configured by default for VS Code but you can
+configure your own ide placeholder with env var IDE_PLACEHOLDER.
 
-Tasks
-==================
+## Useful tasks
 
-- Clear Cache
-- Clear Root Logs
-- Deploy
-- Drop Unused Fields
-- Drop Unused Tables
-- Fix Tables Case
-- New Text Collector
 
-Misc
-==================
 
-- ActivesLocalesExtension: enable in siteconfig locales for fluent
-- Validators: a set of predefined member validators
 
-Third Party
-==================
+## What's included?
 
-Kint: https://github.com/raveren/kint
-Mysqldump : https://github.com/ifsnop/mysqldump-php
+- AdminBasicAuth : simple http basic auth for .env admin without any login/authenticate/member stuff
+- Benchmark : simple way to log time to execute code
+- BuildTaskTools : a trait to make your task tools easier to work with
+- FastExportButton : to make exporting large table easier by executing raw queries
+- FakeDataProvider : a lightweight alternative to faker to get some random stuff
 
-Compatibility
-==================
-Tested with 3.1
+## Compatibility
 
-Maintainer
-==================
+Tested with ^4.3
+
+## Maintainer
+
 LeKoala - thomas@lekoala.be

@@ -1,0 +1,20 @@
+---
+Name: devtoolkit
+Only:
+  environment: dev
+---
+SilverStripe\Control\Director:
+  rules:
+    'typo': 'LeKoala\DevToolkit\TypographyController'
+SilverStripe\Dev\DevBuildController:
+  extensions:
+    - LeKoala\DevToolkit\Extensions\DevBuildExtension
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Dev\DebugView:
+    class: LeKoala\DevToolkit\BetterDebugView
+---
+Name: devtoolkit-all
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Dev\MigrationTask:
+    class: LeKoala\DevToolkit\Tasks\DisabledMigrationTasks
