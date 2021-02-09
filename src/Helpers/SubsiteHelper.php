@@ -165,14 +165,15 @@ class SubsiteHelper
     }
 
     /**
+     * @param bool $flush
      * @return void
      */
-    public static function restoreSubsite()
+    public static function restoreSubsite($flush = null)
     {
         if (!self::usesSubsite()) {
             return;
         }
-        Subsite::changeSubsite(self::$previousSubsite);
+        Subsite::changeSubsite(self::$previousSubsite, $flush);
     }
 
     /**

@@ -13,12 +13,18 @@ class AdminBasicAuth
     /**
      * Require admin login
      *
+     * @param string $user
+     * @param string $password
      * @return void
      */
-    public static function protect()
+    public static function protect($user = null, $password = null)
     {
-        $user = Environment::getEnv('SS_DEFAULT_ADMIN_USERNAME');
-        $password = Environment::getEnv('SS_DEFAULT_ADMIN_PASSWORD');
+        if (!$user) {
+            $user = Environment::getEnv('SS_DEFAULT_ADMIN_USERNAME');
+        }
+        if (!$password) {
+            $password = Environment::getEnv('SS_DEFAULT_ADMIN_PASSWORD');
+        }
         header('Cache-Control: no-cache, must-revalidate, max-age=0');
         $hasSuppliedCredentials = !(empty($_SERVER['PHP_AUTH_USER']) && empty($_SERVER['PHP_AUTH_PW']));
         if ($hasSuppliedCredentials) {
