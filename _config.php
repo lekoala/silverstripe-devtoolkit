@@ -20,28 +20,19 @@ if (!function_exists('d')) {
             return;
         }
 
-        $req = null;
-        if (Controller::has_curr()) {
-            $req = Controller::curr()->getRequest();
-        }
-        $debugView = \SilverStripe\Dev\Debug::create_debug_view($req);
+        $debugView = \SilverStripe\Dev\Debug::create_debug_view();
         // Also show latest object in backtrace
-        if (!Director::is_ajax()) {
-            foreach (debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT) as $row) {
-                if (!empty($row['object'])) {
-                    $args[] = $row['object'];
-                    break;
-                }
+        foreach (debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT) as $row) {
+            if (!empty($row['object'])) {
+                $args[] = $row['object'];
+                break;
             }
         }
         // Show args
         $i = 0;
         $output = [];
         foreach ($args as $val) {
-            $str = $debugView->debugVariable($val, \SilverStripe\Dev\Debug::caller(), true, $i);
-            if (strlen($str) > 255) {
-                $str = substr($str, 0, 252) . "...";
-            }
+            echo $debugView->debugVariable($val, \SilverStripe\Dev\Debug::caller(), true, $i);
             $i++;
         }
         exit();
