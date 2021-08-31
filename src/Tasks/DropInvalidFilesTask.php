@@ -14,6 +14,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Versioned\Versioned;
 use LeKoala\DevToolkit\BuildTaskTools;
 use SilverStripe\Assets\Flysystem\ProtectedAssetAdapter;
+use SilverStripe\Assets\Folder;
 
 /**
  * @author lekoala
@@ -106,7 +107,11 @@ class DropInvalidFilesTask extends BuildTask
 
         /** @var File $file  */
         foreach ($files as $file) {
+            if ($file instanceof Folder) {
+                continue;
+            }
             $path = self::getFullPath($file);
+            $hashPath = self::getHashPath($file);
             if (!trim($file->getRelativePath(), '/')) {
                 $this->message("#{$file->ID}: path is empty");
                 if ($go) {
@@ -115,7 +120,7 @@ class DropInvalidFilesTask extends BuildTask
                     $i++;
                 }
             }
-            if (!file_exists($path)) {
+            if (!file_exists($path) && !file_exists($hashPath)) {
                 $this->message("#{$file->ID}: $path does not exist");
                 if ($go) {
                     // $file->delete();
@@ -154,6 +159,18 @@ class DropInvalidFilesTask extends BuildTask
     public static function getFullPath(File $file)
     {
         return ASSETS_PATH . '/' . $file->getRelativePath();
+    }
+
+    public static function getHashPath(File $file)
+    {
+        $path = $file->getRelativePath();
+        $parts = explode('/', $path);
+        $name = array_pop($parts);
+        $folder = implode("/", $parts);
+
+        $full = ASSETS_PATH . '/' . $folder . '/' . substr($file->getHash(), 0, 10) . '/' . $name;
+        $full = str_replace('//', '/', $full);
+        return $full;
     }
 
     public function getProtectedFullPath(File $file)
