@@ -126,8 +126,11 @@ class BetterDebugView extends DebugView
 
         if (Director::is_ajax()) {
             // In ajax context, we can still use debug info
-            if (is_object($val) && ClassInfo::hasMethod($val, 'debug')) {
-                return $val->debug();
+            if (is_object($val)) {
+                if (ClassInfo::hasMethod($val, 'debug')) {
+                    return $val->debug();
+                }
+                return print_r($val, true);
             }
         } else {
             // Otherwise, we'd rater a full and usable object dump
