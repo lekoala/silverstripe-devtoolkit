@@ -2,10 +2,9 @@
 
 namespace LeKoala\DevToolkit;
 
-use PageController;
 use SilverStripe\Forms\Form;
 use SilverStripe\Assets\Image;
-use SilverStripe\CMS\Controllers\ContentController;
+use SilverStripe\Control\Controller;
 use SilverStripe\Forms\DateField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -31,7 +30,7 @@ use SilverStripe\Forms\CheckboxSetField;
  * @link https://github.com/axllent/silverstripe-typography/blob/master/src/TypographyController.php
  * @link https://github.com/sunnysideup/silverstripe-typography
  */
-class TypographyController extends ContentController
+class TypographyController extends Controller
 {
     public function index(HTTPRequest $request = null)
     {
