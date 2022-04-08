@@ -140,7 +140,30 @@ class BetterDebugView extends DebugView
                 return ob_get_clean();
             }
         }
-        return parent::debugVariableText($val);
+
+        // Check debug
+        if (is_object($val) && ClassInfo::hasMethod($val, 'debug')) {
+            return $val->debug();
+        }
+
+        // Format as array
+        if (is_array($val)) {
+            return print_r($val, true);
+        }
+
+        // Format object
+        if (is_object($val)) {
+            return var_export($val, true);
+        }
+
+        // Format bool
+        if (is_bool($val)) {
+            return '(bool) ' . ($val ? 'true' : 'false');
+        }
+
+        // Format text
+        $html = Convert::raw2xml($val);
+        return "<pre style=\"font-family: Courier new, serif\">{$html}</pre>\n";
     }
 
     /**
