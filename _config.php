@@ -1,5 +1,6 @@
 <?php
 
+use LeKoala\DebugBar\DebugBar;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Environment;
@@ -12,12 +13,25 @@ if (!function_exists('bm')) {
     }
 }
 // Add a debug helper
-if (!function_exists('d')) {
+if (!function_exists('d') && !class_exists(DebugBar::class)) {
     function d(...$args)
     {
         // Don't show on live
         if (Director::isLive()) {
             return;
+        }
+
+        $doExit = true;
+
+        // Allow testing the helper
+        if (isset($args[0]) && $args[0] instanceof \SilverStripe\Dev\SapphireTest) {
+            $doExit = false;
+            array_shift($args);
+        } else {
+            // Clean buffer that may be in the way
+            if (ob_get_contents()) {
+                ob_end_clean();
+            }
         }
 
         $debugView = \SilverStripe\Dev\Debug::create_debug_view();
@@ -35,7 +49,9 @@ if (!function_exists('d')) {
             echo $debugView->debugVariable($val, \SilverStripe\Dev\Debug::caller(), true, $i);
             $i++;
         }
-        exit();
+        if ($doExit) {
+            exit();
+        }
     }
 }
 // Add a logger helper
