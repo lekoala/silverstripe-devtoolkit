@@ -2,12 +2,14 @@
 
 namespace LeKoala\DevToolkit\Tasks;
 
-use LeKoala\DevToolkit\BuildTaskTools;
+use Exception;
 use SilverStripe\ORM\DB;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
+use LeKoala\DevToolkit\BuildTaskTools;
+use SilverStripe\Core\Environment;
 
 /**
  * SilverStripe never delete your tables or fields. Be careful if your database has other tables than SilverStripe!
@@ -24,16 +26,21 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
 
     public function run($request)
     {
+        // This can be very long
+        Environment::setTimeLimitMax(0);
+
         $this->request = $request;
 
         $this->addOption("tables", "Clean unused tables", true);
         $this->addOption("fields", "Clean unused fields", true);
+        $this->addOption("reorder", "Reorder fields", true);
         $this->addOption("go", "Tick this to proceed", false);
 
         $options = $this->askOptions();
 
         $tables = $options['tables'];
         $fields = $options['fields'];
+        $reorder = $options['reorder'];
         $go = $options['go'];
 
         if (!$go) {
@@ -42,8 +49,108 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
             echo ("Let's clean this up!");
         }
         echo ('<hr/>');
-        $this->removeTables($request, $go);
-        $this->removeFields($request, $go);
+        if ($tables) {
+            $this->removeTables($request, $go);
+        }
+        if ($fields) {
+            $this->removeFields($request, $go);
+        }
+        if ($reorder) {
+            $this->reorderFields($request, $go);
+        }
+    }
+
+    protected function reorderFields($request, $go = false)
+    {
+        $conn = DB::get_conn();
+        $schema = DB::get_schema();
+        $dataObjectSchema = DataObject::getSchema();
+        $classes = $this->getClassesWithTables();
+        $tableList = $schema->tableList();
+
+        $this->message('<h2>Fields order</h2>');
+
+        foreach ($classes as $class) {
+            /** @var SilverStripe\ORM\DataObject $singl */
+            $singl = $class::singleton();
+            $baseClass = $singl->baseClass();
+            $table = $dataObjectSchema->tableName($class);
+            $lcTable = strtolower($table);
+
+            // It does not exist in the list, no need to worry about
+            if (!isset($tableList[$lcTable])) {
+                continue;
+            }
+
+            $fields = $dataObjectSchema->databaseFields($class);
+            $baseFields = $dataObjectSchema->databaseFields($baseClass);
+
+            $realFields = $fields;
+            if ($baseClass != $class) {
+                foreach ($baseFields as $k => $v) {
+                    if ($k == "ID") {
+                        continue;
+                    }
+                    unset($realFields[$k]);
+                }
+
+                // When extending multiple classes it's a mess to track, eg SubsitesVirtualPage
+                if (isset($realFields['VersionID'])) {
+                    unset($realFields['VersionID']);
+                }
+            }
+
+            // We must pass the regular table name
+            $list = $schema->fieldList($table);
+
+            $fields_keys = array_keys($realFields);
+            $list_keys = array_keys($list);
+
+            if (json_encode($fields_keys) == json_encode($list_keys)) {
+                continue;
+            }
+
+            $fieldsThatNeedToMove = [];
+            foreach ($fields_keys as $k => $v) {
+                if (!isset($list_keys[$k])) {
+                    continue; // not sure why
+                }
+                if ($list_keys[$k] != $v) {
+                    $fieldsThatNeedToMove[] = $v;
+                }
+            }
+
+            if ($go) {
+                $this->message("$table: moving " . implode(", ", $fieldsThatNeedToMove));
+
+                // $conn->transactionStart();
+                // fields contains the right order (the one from the codebase)
+                $after = "first";
+                foreach ($fields_keys as $k => $v) {
+                    if (isset($list_keys[$k]) && $list_keys[$k] != $v) {
+                        $col = $v;
+                        $def = $list[$v] ?? null;
+                        if (!$def) {
+                            // This happens when extending another model
+                            $this->message("Ignore $v that has no definition", "error");
+                            continue;
+                        }
+                        // you CANNOT combine multiple columns reordering in a single ALTER TABLE statement.
+                        $sql = "ALTER TABLE `$table` MODIFY `$col` $def $after";
+                        $this->message($sql);
+                        try {
+                            $conn->query($sql);
+                        } catch (Exception $e) {
+                            $this->message($e->getMessage(), "error");
+                        }
+                    }
+                    $after = "after $v";
+                }
+                // $conn->transactionEnd();
+            } else {
+                $this->message("$table: would move " . implode(", ", $fieldsThatNeedToMove));
+            }
+        }
     }
 
     protected function removeFields($request, $go = false)
@@ -59,7 +166,7 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         $empty = true;
 
         foreach ($classes as $class) {
-            /* @var $singl SilverStripe\ORM\DataObject */
+            /** @var SilverStripe\ORM\DataObject $singl */
             $singl = $class::singleton();
             $baseClass = $singl->baseClass();
             $table = $dataObjectSchema->tableName($baseClass);
@@ -229,6 +336,7 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
     public function dropColumns($table, $columns)
     {
         switch (get_class(DB::get_conn())) {
+            case \SilverStripe\SQLite\SQLite3Database::class:
             case 'SQLite3Database':
                 $this->sqlLiteDropColumns($table, $columns);
                 break;
