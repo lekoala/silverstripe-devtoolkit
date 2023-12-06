@@ -140,7 +140,7 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         $this->message('<h2>Tables</h2>');
 
         foreach ($classes as $class) {
-            /* @var $singl SilverStripe\ORM\DataObject */
+            /** @var SilverStripe\ORM\DataObject $singl */
             $singl = $class::singleton();
             $table = $dataObjectSchema->tableName($class);
             $lcTable = strtolower($table);
@@ -192,6 +192,7 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
                     if ($tableClass == $potentialClass) {
                         $manyManyRelations = $dataObjectClass::config()->many_many;
                         if (isset($manyManyRelations[$potentialRelation])) {
+                            unset($tablesToRemove[$lcTable]);
                             continue 2;
                         }
                     }
