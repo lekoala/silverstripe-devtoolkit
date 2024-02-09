@@ -63,7 +63,8 @@ class DevBuildExtension extends Extension
         $annotate = $this->getRequest()->getVar('annotate');
         if ($annotate) {
             \SilverLeague\IDEAnnotator\DataObjectAnnotator::config()->enabled = true;
-            \SilverLeague\IDEAnnotator\DataObjectAnnotator::config()->enabled_modules = ['app'];
+        } else {
+            \SilverLeague\IDEAnnotator\DataObjectAnnotator::config()->enabled = false;
         }
 
         $renameColumns = $this->getRequest()->getVar('fixTableCase');

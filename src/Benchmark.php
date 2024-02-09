@@ -9,6 +9,18 @@ use SilverStripe\Core\Injector\Injector;
 class Benchmark
 {
     /**
+     * @var array<string,array<mixed>>
+     */
+    protected static array $metrics = [];
+
+    /**
+     * For example 0.001
+     *
+     * @var float
+     */
+    public static float $slow_threshold = 0;
+
+    /**
      * @return \Monolog\Logger
      */
     public static function getLogger()
@@ -39,11 +51,18 @@ class Benchmark
 
     /**
      * @param null|callable $cb
+     * @param string|null $name
      * @return false|array{'time': string, 'memory': string}
      */
-    protected static function benchmark($cb = null)
+    protected static function benchmark($cb = null, $name = null)
     {
-        static $data = null;
+        static $_data = null;
+
+        if ($name) {
+            $data = self::$metrics[$name] ?? null;
+        } else {
+            $data = $_data;
+        }
 
         // No callback scenario
         if ($cb === null) {
@@ -52,6 +71,9 @@ class Benchmark
                     'startTime' => microtime(true),
                     'startMemory' => memory_get_usage(),
                 ];
+                if ($name) {
+                    self::$metrics[$name] = $data;
+                }
                 // Allow another call
                 return false;
             } else {
@@ -59,7 +81,9 @@ class Benchmark
                 $startMemory = $data['startMemory'];
 
                 // Clear for future calls
-                $data = null;
+                if (!$name) {
+                    $_data = null;
+                }
             }
         } else {
             $startTime = microtime(true);
@@ -96,6 +120,7 @@ class Benchmark
      */
     public static function log(string $name, $cb = null): void
     {
+        // Helps dealing with nasty ajax calls in the admin
         $ignoredPaths = [
             'schema/'
         ];
@@ -105,7 +130,7 @@ class Benchmark
                 return;
             }
         }
-        $data = self::benchmark($cb);
+        $data = self::benchmark($cb, $name);
         if (!$data) {
             return;
         }
@@ -113,10 +138,14 @@ class Benchmark
         $time = $data['time'];
         $memory = $data['memory'];
 
+        if (self::$slow_threshold && $time < self::$slow_threshold) {
+            return;
+        }
+
         $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $line = $bt[1]['line'] ?? 0;
         $file = basename($bt[1]['file'] ?? "unknown");
 
-        self::getLogger()->debug("$name : $time seconds | $memory memory.", [$requestUri, "$file:$line"]);
+        self::getLogger()->debug("$name: $time seconds | $memory memory.", [$requestUri, "$file:$line"]);
     }
 }
