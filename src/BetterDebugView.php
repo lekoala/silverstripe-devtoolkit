@@ -10,7 +10,6 @@ use SilverStripe\Dev\DebugView;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Environment;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\Connect\DatabaseException;
 use LeKoala\Base\Helpers\DatabaseHelper;
 
@@ -24,7 +23,7 @@ class BetterDebugView extends DebugView
 
     /**
      * @param string $file
-     * @param string $line
+     * @param string|int $line
      * @return string
      */
     public static function makeIdeLink($file, $line)
@@ -53,9 +52,9 @@ class BetterDebugView extends DebugView
      * Similar to renderVariable() but respects debug() method on object if available
      *
      * @param mixed $val
-     * @param array $caller
+     * @param array<string,mixed> $caller
      * @param bool $showHeader
-     * @param int $argumentIndex
+     * @param int|null $argumentIndex
      * @return string
      */
     public function debugVariable($val, $caller, $showHeader = true, $argumentIndex = 0)
@@ -92,7 +91,7 @@ class BetterDebugView extends DebugView
     /**
      * @param string $file
      * @param int $line
-     * @return array
+     * @return array<mixed>
      */
     protected function extractArgumentsName($file, $line)
     {
@@ -214,6 +213,10 @@ class BetterDebugView extends DebugView
         return $output;
     }
 
+    /**
+     * @param Exception $exception
+     * @return void
+     */
     public function writeException(Exception $exception)
     {
         $infos = self::makeIdeLink($exception->getFile(), $exception->getLine());
@@ -242,7 +245,7 @@ class BetterDebugView extends DebugView
     /**
      * Render a call track
      *
-     * @param  array $trace The debug_backtrace() array
+     * @param  array<mixed> $trace The debug_backtrace() array
      * @return string
      */
     public function renderTrace($trace)
@@ -258,7 +261,7 @@ class BetterDebugView extends DebugView
     /**
      * Render a backtrace array into an appropriate plain-text or HTML string.
      *
-     * @param array $bt The trace array, as returned by debug_backtrace() or Exception::getTrace()
+     * @param array<string,mixed> $bt The trace array, as returned by debug_backtrace() or Exception::getTrace()
      * @return string The rendered backtrace
      */
     public static function get_rendered_backtrace($bt)

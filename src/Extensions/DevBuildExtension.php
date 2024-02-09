@@ -10,6 +10,8 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
+use LeKoala\DevToolkit\Helpers\DevUtils;
 use LeKoala\DevToolkit\Helpers\FileHelper;
 use LeKoala\DevToolkit\Helpers\SubsiteHelper;
 
@@ -26,39 +28,73 @@ use LeKoala\DevToolkit\Helpers\SubsiteHelper;
  *
  * Preserve current subsite
  *
- * @property \SilverStripe\Dev\DevBuildController|\LeKoala\DevToolkit\Extensions\DevBuildExtension $owner
+ * @property \SilverStripe\Dev\DevBuildController $owner
  */
 class DevBuildExtension extends Extension
 {
+    /**
+     * @var \SilverStripe\Subsites\Model\Subsite|null
+     */
     protected $currentSubsite;
 
+    /**
+     * @return \SilverStripe\Dev\DevBuildController
+     */
+    public function getExtensionOwner()
+    {
+        return $this->owner;
+    }
+
+    /**
+     * @return HTTPRequest
+     */
+    public function getRequest()
+    {
+        return $this->getExtensionOwner()->getRequest();
+    }
+
+    /**
+     * @return void
+     */
     public function beforeCallActionHandler()
     {
         $this->currentSubsite = SubsiteHelper::currentSubsiteID();
 
-        $renameColumns = $this->owner->getRequest()->getVar('fixTableCase');
+        $annotate = $this->getRequest()->getVar('annotate');
+        if ($annotate) {
+            \SilverLeague\IDEAnnotator\DataObjectAnnotator::config()->enabled = true;
+            \SilverLeague\IDEAnnotator\DataObjectAnnotator::config()->enabled_modules = ['app'];
+        }
+
+        $renameColumns = $this->getRequest()->getVar('fixTableCase');
         if ($renameColumns) {
             $this->displayMessage("<div class='build'><p><b>Fixing tables case</b></p><ul>\n\n");
             $this->fixTableCase();
             $this->displayMessage("</ul>\n<p><b>Tables fixed!</b></p></div>");
         }
 
-        $renameColumns = $this->owner->getRequest()->getVar('renameColumns');
+        $renameColumns = $this->getRequest()->getVar('renameColumns');
         if ($renameColumns) {
             $this->displayMessage("<div class='build'><p><b>Renaming columns</b></p><ul>\n\n");
             $this->renameColumns();
             $this->displayMessage("</ul>\n<p><b>Columns renamed!</b></p></div>");
         }
 
-        $truncateSiteTree = $this->owner->getRequest()->getVar('truncateSiteTree');
+        $truncateSiteTree = $this->getRequest()->getVar('truncateSiteTree');
         if ($truncateSiteTree) {
             $this->displayMessage("<div class='build'><p><b>Truncating SiteTree</b></p><ul>\n\n");
             $this->truncateSiteTree();
             $this->displayMessage("</ul>\n<p><b>SiteTree truncated!</b></p></div>");
         }
+
+        // Reverse the logic, don't populate by default
+        DevUtils::updatePropCb($this->getRequest(), 'getVars', function ($arr) {
+            $arr['dont_populate'] = !!$this->getRequest()->getVar('populate');
+            return $arr;
+        });
     }
 
-    protected function fixTableCase()
+    protected function fixTableCase(): void
     {
         if (!Director::isDev()) {
             throw new Exception("Only available in dev mode");
@@ -74,7 +110,7 @@ class DevBuildExtension extends Extension
         //TODO: check list of tables name and match any lowercased one to the right one from the db schema
     }
 
-    protected function truncateSiteTree()
+    protected function truncateSiteTree(): void
     {
         if (!Director::isDev()) {
             throw new Exception("Only available in dev mode");
@@ -101,10 +137,8 @@ SQL;
      * Loop on all DataObjects and look for rename_columns property
      *
      * It will rename old columns from old_value => new_value
-     *
-     * @return void
      */
-    protected function renameColumns()
+    protected function renameColumns(): void
     {
         $classes = $this->getDataObjects();
 
@@ -157,7 +191,7 @@ SQL;
         }
     }
 
-    public function afterCallActionHandler()
+    public function afterCallActionHandler(): void
     {
         // Other helpers
         $clearCache = $this->owner->getRequest()->getVar('clearCache');
@@ -189,7 +223,7 @@ SQL;
         }
     }
 
-    protected function clearCache()
+    protected function clearCache(): void
     {
         $this->displayMessage("<strong>Clearing cache folder</strong>");
         $folder = Director::baseFolder() . '/silverstripe-cache';
@@ -202,7 +236,7 @@ SQL;
         $this->displayMessage("Cleared silverstripe-cache folder\n");
     }
 
-    protected function clearEmptyFolders()
+    protected function clearEmptyFolders(): void
     {
         $this->displayMessage("<strong>Clearing empty folders in assets</strong>");
         $folder = Director::publicFolder() . '/assets';
@@ -228,7 +262,7 @@ SQL;
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     protected function getDataObjects()
     {
@@ -238,9 +272,9 @@ SQL;
     }
 
     /**
-     * @param $message
+     * @param string $message
      */
-    protected function displayMessage($message)
+    protected function displayMessage($message): void
     {
         echo Director::is_cli() ? strip_tags($message) : nl2br($message);
     }

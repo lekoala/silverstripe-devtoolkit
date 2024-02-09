@@ -4,8 +4,6 @@ namespace LeKoala\DevToolkit;
 
 use Psr\Log\LoggerInterface;
 use LeKoala\Base\Helpers\ClassHelper;
-use SilverStripe\Control\Director;
-use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 
 class Benchmark
@@ -115,6 +113,10 @@ class Benchmark
         $time = $data['time'];
         $memory = $data['memory'];
 
-        self::getLogger()->debug("$name : $time seconds | $memory memory.", [$requestUri]);
+        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $line = $bt[1]['line'] ?? 0;
+        $file = basename($bt[1]['file'] ?? "unknown");
+
+        self::getLogger()->debug("$name : $time seconds | $memory memory.", [$requestUri, "$file:$line"]);
     }
 }

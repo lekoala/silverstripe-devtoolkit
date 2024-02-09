@@ -4,6 +4,7 @@ namespace LeKoala\DevToolkit\Helpers;
 
 use Exception;
 use SilverStripe\ORM\DB;
+use SilverStripe\ORM\DataList;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
@@ -17,6 +18,11 @@ use SilverStripe\Subsites\Model\Subsite;
  */
 class DuplicateMembersMerger
 {
+
+    /**
+     * @param DataList $records
+     * @return void
+     */
     public static function merge($records)
     {
         $all            = array();
