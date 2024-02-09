@@ -4,6 +4,8 @@ namespace LeKoala\DevToolkit;
 
 use Psr\Log\LoggerInterface;
 use LeKoala\Base\Helpers\ClassHelper;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Injector;
 
 class Benchmark
@@ -96,6 +98,15 @@ class Benchmark
      */
     public static function log(string $name, $cb = null): void
     {
+        $ignoredPaths = [
+            'schema/'
+        ];
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        foreach ($ignoredPaths as $ignoredPath) {
+            if (str_contains($requestUri, $ignoredPath)) {
+                return;
+            }
+        }
         $data = self::benchmark($cb);
         if (!$data) {
             return;
@@ -104,6 +115,6 @@ class Benchmark
         $time = $data['time'];
         $memory = $data['memory'];
 
-        self::getLogger()->debug("$name : $time seconds and $memory memory.");
+        self::getLogger()->debug("$name : $time seconds | $memory memory.", [$requestUri]);
     }
 }

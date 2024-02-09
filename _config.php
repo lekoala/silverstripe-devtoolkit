@@ -14,16 +14,6 @@ if (!function_exists('bm')) {
         \LeKoala\DevToolkit\Benchmark::run($cb);
     }
 }
-// Add a benchmark logger helper
-if (!function_exists('bml')) {
-    /**
-     * @param null|string|callable $cb
-     */
-    function bml($cb = null): void
-    {
-        \LeKoala\DevToolkit\Benchmark::log($cb);
-    }
-}
 
 // Add a debug helper
 if (!function_exists('d') && !class_exists(DebugBar::class)) {
