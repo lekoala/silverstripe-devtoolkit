@@ -1,20 +1,33 @@
 <?php
 
 use LeKoala\DebugBar\DebugBar;
-use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Environment;
 
 // Add a benchmark helper
 if (!function_exists('bm')) {
-    function bm($cb = null)
+    /**
+     * @param null|string|callable $cb
+     */
+    function bm($cb = null): void
     {
         \LeKoala\DevToolkit\Benchmark::run($cb);
     }
 }
+// Add a benchmark logger helper
+if (!function_exists('bml')) {
+    /**
+     * @param null|string|callable $cb
+     */
+    function bml($cb = null): void
+    {
+        \LeKoala\DevToolkit\Benchmark::log($cb);
+    }
+}
+
 // Add a debug helper
 if (!function_exists('d') && !class_exists(DebugBar::class)) {
-    function d(...$args)
+    function d(...$args): void
     {
         // Don't show on live
         if (Director::isLive()) {
@@ -34,6 +47,7 @@ if (!function_exists('d') && !class_exists(DebugBar::class)) {
             }
         }
 
+        /** @var \LeKoala\DevToolkit\BetterDebugView $debugView */
         $debugView = \SilverStripe\Dev\Debug::create_debug_view();
         // Also show latest object in backtrace
         foreach (debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT) as $row) {
@@ -56,7 +70,7 @@ if (!function_exists('d') && !class_exists(DebugBar::class)) {
 }
 // Add a logger helper
 if (!function_exists('l')) {
-    function l()
+    function l(): void
     {
         $priority = 100;
         $extras = func_get_args();

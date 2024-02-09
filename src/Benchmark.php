@@ -2,17 +2,19 @@
 
 namespace LeKoala\DevToolkit;
 
+use Psr\Log\LoggerInterface;
 use LeKoala\Base\Helpers\ClassHelper;
 use SilverStripe\Core\Injector\Injector;
 
 class Benchmark
 {
     /**
-     * @return Monolog\Logger
+     * @return \Monolog\Logger
      */
     public static function getLogger()
     {
-        $class = array_pop(explode("\\", get_called_class()));
+        $parts = explode("\\", get_called_class());
+        $class = array_pop($parts);
         return Injector::inst()->get(LoggerInterface::class)->withName(ClassHelper::getClassWithoutNamespace($class));
     }
 
@@ -31,14 +33,13 @@ class Benchmark
         if (!$data) {
             return;
         }
-
         printf("It took %s seconds and used %s memory", $data['time'], $data['memory']);
         die();
     }
 
     /**
-     * @param callable $cb
-     * @return bool|array
+     * @param null|callable $cb
+     * @return false|array{'time': string, 'memory': string}
      */
     protected static function benchmark($cb = null)
     {
@@ -79,15 +80,21 @@ class Benchmark
         ];
     }
 
-    protected static function bytesToHuman($bytes, $decimals = 2)
+    protected static function bytesToHuman(float $bytes, int $decimals = 2): string
     {
-        $size   = array('B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-        $factor = floor((strlen($bytes) - 1) / 3);
-
-        return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$size[$factor];
+        if ($bytes == 0) {
+            return "0.00 B";
+        }
+        $e = floor(log($bytes, 1024));
+        return round($bytes / pow(1024, $e), 2) . ['B', 'KB', 'MB', 'GB', 'TB', 'PB'][$e];
     }
 
-    public static function log($name, $cb = null)
+    /**
+     * @param string $name
+     * @param null|callable $cb
+     * @return void
+     */
+    public static function log(string $name, $cb = null): void
     {
         $data = self::benchmark($cb);
         if (!$data) {
