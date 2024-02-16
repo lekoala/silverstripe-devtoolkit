@@ -90,7 +90,9 @@ class DevBuildExtension extends Extension
 
         // Reverse the logic, don't populate by default
         DevUtils::updatePropCb($this->getRequest(), 'getVars', function ($arr) {
-            $arr['dont_populate'] = !!$this->getRequest()->getVar('populate');
+            if ($this->getRequest()->getVar('populate')) {
+                $arr['dont_populate'] = false;
+            }
             return $arr;
         });
     }
