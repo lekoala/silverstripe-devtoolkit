@@ -32,7 +32,6 @@ class DevUtils
         $refProperty = $refObject->getProperty($prop);
         $refProperty->setAccessible(true);
         $refProperty->setValue($obj, $cb($refProperty->getValue($obj)));
-        d($obj);
     }
 
     /**
