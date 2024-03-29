@@ -10,6 +10,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use LeKoala\DevToolkit\BuildTaskTools;
 use SilverStripe\Core\Environment;
+use SilverStripe\Control\HTTPRequest;
 
 /**
  * SilverStripe never delete your tables or fields. Be careful if your database has other tables than SilverStripe!
@@ -20,10 +21,25 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
 {
     use BuildTaskTools;
 
+    /**
+     * @var string
+     */
     protected $title = "Drop unused database objects";
+
+    /**
+     * @var string
+     */
     protected $description = 'Drop unused tables and fields from your db by comparing current database tables with your dataobjects.';
+
+    /**
+     * @var string
+     */
     private static $segment = 'DropUnusedDatabaseObjectsTask';
 
+    /**
+     * @param HTTPRequest $request
+     * @return void
+     */
     public function run($request)
     {
         // This can be very long
@@ -60,6 +76,11 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         }
     }
 
+    /**
+     * @param HTTPRequest $request
+     * @param bool $go
+     * @return void
+     */
     protected function reorderFields($request, $go = false)
     {
         $conn = DB::get_conn();
@@ -71,7 +92,7 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         $this->message('<h2>Fields order</h2>');
 
         foreach ($classes as $class) {
-            /** @var SilverStripe\ORM\DataObject $singl */
+            /** @var \SilverStripe\ORM\DataObject $singl */
             $singl = $class::singleton();
             $baseClass = $singl->baseClass();
             $table = $dataObjectSchema->tableName($class);
@@ -153,6 +174,11 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         }
     }
 
+    /**
+     * @param HTTPRequest $request
+     * @param bool $go
+     * @return void
+     */
     protected function removeFields($request, $go = false)
     {
         $conn = DB::get_conn();
@@ -165,17 +191,22 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
 
         $empty = true;
 
+        $processedTables = [];
         foreach ($classes as $class) {
-            /** @var SilverStripe\ORM\DataObject $singl */
+            /** @var \SilverStripe\ORM\DataObject $singl */
             $singl = $class::singleton();
             $baseClass = $singl->baseClass();
             $table = $dataObjectSchema->tableName($baseClass);
             $lcTable = strtolower($table);
 
+            if (in_array($table, $processedTables)) {
+                continue;
+            }
             // It does not exist in the list, no need to worry about
             if (!isset($tableList[$lcTable])) {
                 continue;
             }
+            $processedTables[] = $table;
             $toDrop = [];
 
             $fields = $dataObjectSchema->databaseFields($class);
@@ -202,10 +233,54 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
                 }
             }
 
+            // Many many support if has own base table
+            $many_many = $singl::config()->many_many;
+            foreach ($many_many as $manyName => $manyClass) {
+                $toDrop = [];
+
+                // No polymorphism support
+                if (is_array($manyClass)) {
+                    continue;
+                }
+
+                // This is very naive and only works in basic cases
+                $manyTable = $table . '_' . $manyName;
+                if (!$schema->hasTable($manyTable)) {
+                    continue;
+                }
+                $baseManyTable = $dataObjectSchema->tableName($manyClass);
+                $list = $schema->fieldList($manyTable);
+                $props = $singl::config()->many_many_extraFields[$manyName] ?? [];
+                if (empty($props)) {
+                    continue;
+                }
+
+                // We might miss some!
+                $validNames = array_merge([
+                    'ID', $baseManyTable . 'ID', $table . 'ID', $table . 'ID', 'ChildID', 'SubsiteID',
+                ], array_keys($props));
+                foreach ($list as $fieldName => $fieldDef) {
+                    if (!in_array($fieldName, $validNames)) {
+                        $toDrop[] = $fieldName;
+                    }
+                }
+
+                if (!empty($toDrop)) {
+                    $empty = false;
+                    if ($go) {
+                        $this->dropColumns($manyTable, $toDrop);
+                        $this->message("Dropped " . implode(',', $toDrop) . " for $manyTable ($table)", "obsolete");
+                    } else {
+                        $this->message("Would drop " . implode(',', $toDrop) . " for $manyTable ($table)", "obsolete");
+                    }
+                }
+            }
+
             // Localised fields support
             if ($singl->hasExtension("\\TractorCow\\Fluent\\Extension\\FluentExtension")) {
                 $toDrop = [];
                 $localeTable = $table . '_Localised';
+                //@phpstan-ignore-next-line
                 $localeFields = $singl->getLocalisedFields($baseClass);
                 $localeList = $schema->fieldList($localeTable);
                 foreach ($localeList as $fieldName => $type) {
@@ -234,6 +309,11 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         }
     }
 
+    /**
+     * @param HTTPRequest $request
+     * @param bool $go
+     * @return void
+     */
     protected function removeTables($request, $go = false)
     {
         $conn = DB::get_conn();
@@ -247,7 +327,7 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         $this->message('<h2>Tables</h2>');
 
         foreach ($classes as $class) {
-            /** @var SilverStripe\ORM\DataObject $singl */
+            /** @var \SilverStripe\ORM\DataObject $singl */
             $singl = $class::singleton();
             $table = $dataObjectSchema->tableName($class);
             $lcTable = strtolower($table);
@@ -319,13 +399,18 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     protected function getClassesWithTables()
     {
         return ClassInfo::dataClassesFor(DataObject::class);
     }
 
+    /**
+     * @param mixed $val
+     * @param array<mixed> $arr
+     * @return void
+     */
     public static function removeFromArray($val, &$arr)
     {
         if (isset($arr[$val])) {
@@ -333,6 +418,11 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         }
     }
 
+    /**
+     * @param string $table
+     * @param array<string> $columns
+     * @return void
+     */
     public function dropColumns($table, $columns)
     {
         switch (get_class(DB::get_conn())) {
@@ -346,11 +436,21 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
         }
     }
 
+    /**
+     * @param string $table
+     * @param array<string> $columns
+     * @return void
+     */
     public function sqlDropColumns($table, $columns)
     {
         DB::query("ALTER TABLE \"$table\" DROP \"" . implode('", DROP "', $columns) . "\"");
     }
 
+    /**
+     * @param string $table
+     * @param array<string> $columns
+     * @return void
+     */
     public function sqlLiteDropColumns($table, $columns)
     {
         $newColsSpec = $newCols = [];
