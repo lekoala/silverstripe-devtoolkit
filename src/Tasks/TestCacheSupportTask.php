@@ -31,6 +31,11 @@ class TestCacheSupportTask extends BuildTask
 
     protected function testRedis()
     {
+        if (!class_exists(Client::class)) {
+            $this->message("Predis\\Client class does not exist. Redis support is not installed");
+            return;
+        }
+
         $predis = new Client('tcp://127.0.0.1:6379');
         $this->message($predis->executeCommand(new ServerInfo));
 
@@ -42,24 +47,24 @@ class TestCacheSupportTask extends BuildTask
     protected function testOpcache()
     {
         if (!function_exists('opcache_get_status')) {
-            $this->msg("opcache_get_status function is not defined");
+            $this->message("opcache_get_status function is not defined");
         }
 
         $result = opcache_get_status();
         if ($result) {
-            $this->msg("Opcache is active");
+            $this->message("Opcache is active");
 
             echo '<pre>';
             print_r($result);
             echo '</pre>';
         } else {
-            $this->msg("Opcache is disabled. It should be enabled to ensure optimal performances", "error");
+            $this->message("Opcache is disabled. It should be enabled to ensure optimal performances", "error");
         }
     }
     protected function testMemcache()
     {
         if (!class_exists('Memcache')) {
-            $this->msg("Memcache class does not exist. Make sure that the Memcache extension is installed");
+            $this->message("Memcache class does not exist. Make sure that the Memcache extension is installed");
         }
 
         $host = defined('MEMCACHE_HOST') ? MEMCACHE_HOST : 'localhost';
@@ -69,14 +74,14 @@ class TestCacheSupportTask extends BuildTask
         $connected = $memcache->connect($host, $port);
 
         if ($connected) {
-            $this->msg("Server's version: " . $memcache->getVersion());
+            $this->message("Server's version: " . $memcache->getVersion());
 
             $result = $memcache->get("key");
 
             if ($result) {
-                $this->msg("Data found in cache");
+                $this->message("Data found in cache");
             } else {
-                $this->msg("Data not found in cache");
+                $this->message("Data not found in cache");
                 $tmp_object = new stdClass;
                 $tmp_object->str_attr = "test";
                 $tmp_object->int_attr = 123;
@@ -86,13 +91,13 @@ class TestCacheSupportTask extends BuildTask
                 $memcache->set("key", $tmp_object, false, 10);
             }
 
-            $this->msg("Store data in the cache (data will expire in 10 seconds)");
-            $this->msg("Data from the cache:");
+            $this->message("Store data in the cache (data will expire in 10 seconds)");
+            $this->message("Data from the cache:");
             echo '<pre>';
             var_dump($memcache->get("key"));
             echo '</pre>';
         } else {
-            $this->msg("Failed to connect");
+            $this->message("Failed to connect");
         }
     }
 }
