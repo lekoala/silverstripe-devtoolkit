@@ -28,6 +28,8 @@ class BetterDebugView extends DebugView
      */
     public static function makeIdeLink($file, $line)
     {
+        $file = $file ?? '';
+        $line = $line ?? 0;
         $shortname = basename($file);
 
         // does not make sense in testing or live
@@ -197,7 +199,7 @@ class BetterDebugView extends DebugView
         $errorType = isset(self::$error_types[$errno]) ? self::$error_types[$errno] : self::$unknown_error;
         $httpRequestEnt = htmlentities($httpRequest, ENT_COMPAT, 'UTF-8');
         if (ini_get('html_errors')) {
-            $errstr = strip_tags($errstr);
+            $errstr = strip_tags($errstr ?? '');
         } else {
             $errstr = Convert::raw2xml($errstr);
         }
