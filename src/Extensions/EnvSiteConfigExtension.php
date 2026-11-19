@@ -5,7 +5,7 @@ namespace LeKoala\DevToolkit\Extensions;
 use Exception;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Control\Director;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Security\Permission;
 
@@ -14,7 +14,7 @@ use SilverStripe\Security\Permission;
  *
  * @author lekoala
  */
-class EnvSiteConfigExtension extends DataExtension
+class EnvSiteConfigExtension extends Extension
 {
     public function updateCMSFields(FieldList $fields)
     {

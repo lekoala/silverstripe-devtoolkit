@@ -7,9 +7,9 @@ use SilverStripe\Dev\MigrationTask;
 /**
  * This is just to hide a useless migration task
  */
-class DisabledMigrationTasks extends MigrationTask
+abstract class DisabledMigrationTasks extends MigrationTask
 {
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return get_called_class() != self::class;
     }

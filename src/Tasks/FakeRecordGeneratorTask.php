@@ -17,31 +17,26 @@ use SilverStripe\ORM\FieldType\DBBoolean;
 use SilverStripe\ORM\FieldType\DBVarchar;
 use SilverStripe\ORM\FieldType\DBCurrency;
 use SilverStripe\ORM\FieldType\DBHTMLText;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class FakeRecordGeneratorTask extends BuildTask
 {
     use BuildTaskTools;
 
-    protected $title = "Fake Record Generator";
-    protected $description = 'Generate fake records for a given class';
-    private static $segment = 'FakeRecordGeneratorTask';
+    protected static string $commandName = 'fake-record-generator';
+    protected string $title = 'Fake Record Generator';
+    protected static string $description = 'Generate fake records for a given class in dev mode.';
 
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
-        $this->request = $request;
-
-        $list = $this->getValidDataObjects();
-        $this->addOption("model", "Which model to generate", null, $list);
-        $this->addOption("how_many", "How many records to generate", 20);
-        $this->addOption("member_from_api", "Use https://randomuser.me to generate members", true);
-        $this->addOption("clear_existing", "Clear existing data", false);
-
-        $options = $this->askOptions();
-
-        $model = $options['model'];
-        $how_many = $options['how_many'];
-        $member_from_api = $options['member_from_api'];
-        $clear_existing = $options['clear_existing'];
+        $this->setTaskContext($input, $output);
+        $model = (string) $this->taskOption('model', '');
+        $how_many = (int) $this->taskOption('count', 20);
+        $member_from_api = (bool) $this->taskOption('member-from-api');
+        $clear_existing = (bool) $this->taskOption('clear-existing');
 
         if ($model) {
             $sing = singleton($model);
@@ -157,6 +152,26 @@ class FakeRecordGeneratorTask extends BuildTask
         } else {
             $this->message("Implement 'fillFake' method to create your own fakes");
         }
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * @return array<InputOption>
+     */
+    public function getOptions(): array
+    {
+        return [
+            new InputOption('model', null, InputOption::VALUE_REQUIRED, 'Fully qualified model class'),
+            new InputOption('count', null, InputOption::VALUE_REQUIRED, 'Number of records', 20),
+            new InputOption(
+                'member-from-api',
+                null,
+                InputOption::VALUE_NONE,
+                'Use randomuser.me when generating members',
+            ),
+            new InputOption('clear-existing', null, InputOption::VALUE_NONE, 'Delete existing records first'),
+        ];
     }
 
     protected function getRandomValueFromType($type, $name, $record)
@@ -255,7 +270,7 @@ class FakeRecordGeneratorTask extends BuildTask
         }
     }
 
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return Director::isDev();
     }

@@ -10,7 +10,10 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use LeKoala\DevToolkit\BuildTaskTools;
 use SilverStripe\Core\Environment;
-use SilverStripe\Control\HTTPRequest;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * SilverStripe never delete your tables or fields. Be careful if your database has other tables than SilverStripe!
@@ -21,67 +24,62 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
 {
     use BuildTaskTools;
 
-    /**
-     * @var string
-     */
-    protected $title = "Drop unused database objects";
+    protected static string $commandName = 'drop-unused-database-objects';
+
+    protected string $title = 'Drop unused database objects';
+
+    protected static string $description =
+        'Preview or drop unused tables and fields by comparing the database with the DataObject schema.';
 
     /**
-     * @var string
      */
-    protected $description = 'Drop unused tables and fields from your db by comparing current database tables with your dataobjects.';
-
-    /**
-     * @var string
-     */
-    private static $segment = 'DropUnusedDatabaseObjectsTask';
-
-    /**
-     * @param HTTPRequest $request
-     * @return void
-     */
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
         // This can be very long
         Environment::setTimeLimitMax(0);
 
-        $this->request = $request;
-
-        $this->addOption("tables", "Clean unused tables", true);
-        $this->addOption("fields", "Clean unused fields", true);
-        $this->addOption("reorder", "Reorder fields", false);
-        $this->addOption("go", "Tick this to proceed", false);
-
-        $options = $this->askOptions();
-
-        $tables = $options['tables'];
-        $fields = $options['fields'];
-        $reorder = $options['reorder'];
-        $go = $options['go'];
+        $this->setTaskContext($input, $output);
+        $tables = (bool) $this->taskOption('tables');
+        $fields = (bool) $this->taskOption('fields');
+        $reorder = (bool) $this->taskOption('reorder');
+        $go = (bool) $this->taskOption('go');
 
         if (!$go) {
-            echo ('Previewing what this task is about to do.');
+            $this->message('Previewing what this task is about to do.');
         } else {
-            echo ("Let's clean this up!");
+            $this->message("Let's clean this up!");
         }
-        echo ('<hr/>');
         if ($tables) {
-            $this->removeTables($request, $go);
+            $this->removeTables($go);
         }
         if ($fields) {
-            $this->removeFields($request, $go);
+            $this->removeFields($go);
         }
         if ($reorder) {
-            $this->reorderFields($request, $go);
+            $this->reorderFields($go);
         }
+
+        return Command::SUCCESS;
     }
 
     /**
-     * @param HTTPRequest $request
+     * @return array<InputOption>
+     */
+    public function getOptions(): array
+    {
+        return [
+            new InputOption('tables', null, InputOption::VALUE_NONE, 'Inspect unused tables'),
+            new InputOption('fields', null, InputOption::VALUE_NONE, 'Inspect unused fields'),
+            new InputOption('reorder', null, InputOption::VALUE_NONE, 'Reorder fields to match the schema'),
+            new InputOption('go', null, InputOption::VALUE_NONE, 'Apply the selected operations'),
+        ];
+    }
+
+    /**
      * @param bool $go
      * @return void
      */
-    protected function reorderFields($request, $go = false)
+    protected function reorderFields($go = false)
     {
         $conn = DB::get_conn();
         $schema = DB::get_schema();
@@ -175,11 +173,10 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
     }
 
     /**
-     * @param HTTPRequest $request
      * @param bool $go
      * @return void
      */
-    protected function removeFields($request, $go = false)
+    protected function removeFields($go = false)
     {
         $conn = DB::get_conn();
         $schema = DB::get_schema();
@@ -310,11 +307,10 @@ class DropUnusedDatabaseObjectsTask extends BuildTask
     }
 
     /**
-     * @param HTTPRequest $request
      * @param bool $go
      * @return void
      */
-    protected function removeTables($request, $go = false)
+    protected function removeTables($go = false)
     {
         $conn = DB::get_conn();
         $schema = DB::get_schema();

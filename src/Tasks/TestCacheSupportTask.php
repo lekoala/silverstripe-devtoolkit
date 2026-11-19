@@ -9,6 +9,9 @@ use SilverStripe\Dev\BuildTask;
 use LeKoala\DevToolkit\BuildTaskTools;
 use SilverStripe\Core\Injector\Injector;
 use LeKoala\Base\Cache\RedisCacheFactory;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 
 /**
  */
@@ -16,17 +19,19 @@ class TestCacheSupportTask extends BuildTask
 {
     use BuildTaskTools;
 
-    protected $title = "Test Cache Support";
-    protected $description = 'Check what cache backends are available and working.';
-    private static $segment = 'TestCacheSupportTask';
+    protected static string $commandName = 'test-cache-support';
+    protected string $title = 'Test Cache Support';
+    protected static string $description = 'Check what cache backends are available and working.';
 
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
-        $this->request = $request;
+        $this->setTaskContext($input, $output);
 
         $this->testMemcache();
         $this->testOpcache();
         $this->testRedis();
+
+        return Command::SUCCESS;
     }
 
     protected function testRedis()
@@ -53,10 +58,7 @@ class TestCacheSupportTask extends BuildTask
         $result = opcache_get_status();
         if ($result) {
             $this->message("Opcache is active");
-
-            echo '<pre>';
-            print_r($result);
-            echo '</pre>';
+            $this->message($result);
         } else {
             $this->message("Opcache is disabled. It should be enabled to ensure optimal performances", "error");
         }
@@ -65,6 +67,7 @@ class TestCacheSupportTask extends BuildTask
     {
         if (!class_exists('Memcache')) {
             $this->message("Memcache class does not exist. Make sure that the Memcache extension is installed");
+            return;
         }
 
         $host = defined('MEMCACHE_HOST') ? MEMCACHE_HOST : 'localhost';
@@ -93,9 +96,7 @@ class TestCacheSupportTask extends BuildTask
 
             $this->message("Store data in the cache (data will expire in 10 seconds)");
             $this->message("Data from the cache:");
-            echo '<pre>';
-            var_dump($memcache->get("key"));
-            echo '</pre>';
+            $this->message($memcache->get("key"));
         } else {
             $this->message("Failed to connect");
         }

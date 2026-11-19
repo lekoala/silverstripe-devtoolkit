@@ -4,7 +4,7 @@ namespace LeKoala\DevToolkit\Extensions;
 
 use SilverStripe\Security\Member;
 use SilverStripe\Admin\LeftAndMain;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Control\Controller;
 use SilverStripe\Security\DefaultAdminService;
 use SilverStripe\View\Parsers\URLSegmentFilter;
@@ -14,7 +14,7 @@ use SilverStripe\View\Parsers\URLSegmentFilter;
  *
  * @property \SilverStripe\Security\Group $owner
  */
-class DevGroupExtension extends DataExtension
+class DevGroupExtension extends Extension
 {
     public function onAfterWrite()
     {

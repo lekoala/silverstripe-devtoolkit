@@ -8,6 +8,10 @@ use SilverStripe\Assets\Image;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Assets\Storage\Sha1FileHashingService;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * In case images are resized by an external utility
@@ -19,17 +23,14 @@ class RehashImagesTask extends BuildTask
 {
     use BuildTaskTools;
 
-    protected $title = "Rehash Images";
-    private static $segment = 'RehashImagesTask';
+    protected static string $commandName = 'rehash-images';
+    protected string $title = 'Rehash Images';
+    protected static string $description = 'Recompute image file hashes and remove missing image records.';
 
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
-        $this->request = $request;
-        $this->addOption("go", "Set this to 1 to proceed", 0);
-
-        $options = $this->askOptions();
-
-        $go = $options['go'];
+        $this->setTaskContext($input, $output);
+        $go = (bool) $this->taskOption('go');
 
         $service = new Sha1FileHashingService();
 
@@ -72,5 +73,21 @@ class RehashImagesTask extends BuildTask
         if (!$tofix && !$todelete) {
             $this->message("All files are good", "good");
         }
+
+        if (!$go) {
+            $this->message('Dry run, pass --go to repair file hashes and remove missing records.', 'notice');
+        }
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * @return array<InputOption>
+     */
+    public function getOptions(): array
+    {
+        return [
+            new InputOption('go', null, InputOption::VALUE_NONE, 'Apply hash repairs and deletions'),
+        ];
     }
 }

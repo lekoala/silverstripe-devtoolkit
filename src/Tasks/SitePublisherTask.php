@@ -5,6 +5,10 @@ namespace LeKoala\DevToolkit\Tasks;
 use LeKoala\DevToolkit\BuildTaskTools;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Versioned\Versioned;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  */
@@ -12,20 +16,15 @@ class SitePublisherTask extends BuildTask
 {
     use BuildTaskTools;
 
-    protected $title = "Site Publisher";
-    protected $description = 'Publish the whole site in one click.';
-    private static $segment = 'SitePublisherTask';
+    protected static string $commandName = 'site-publisher';
+    protected string $title = 'Site Publisher';
+    protected static string $description = 'Publish selected versioned DataObject classes.';
 
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
-        $this->request = $request;
-        $this->addOption("classes", "Classes to publish (comma separated)", 'Page');
-        $this->addOption("go", "Set this to 1 to proceed", 0);
-
-        $options = $this->askOptions();
-
-        $classes = $options['classes'];
-        $go = $options['go'];
+        $this->setTaskContext($input, $output);
+        $classes = (string) $this->taskOption('classes', 'Page');
+        $go = (bool) $this->taskOption('go');
 
         $cbSave = function ($List, $publish = false) {
             foreach ($List as $Item) {
@@ -70,5 +69,18 @@ class SitePublisherTask extends BuildTask
                 $this->message("Would publish " . $class::get()->count() . " items for class " . $class);
             }
         }
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * @return array<InputOption>
+     */
+    public function getOptions(): array
+    {
+        return [
+            new InputOption('classes', null, InputOption::VALUE_REQUIRED, 'Comma-separated classes', 'Page'),
+            new InputOption('go', null, InputOption::VALUE_NONE, 'Apply publishing'),
+        ];
     }
 }
