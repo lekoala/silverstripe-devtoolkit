@@ -3,7 +3,7 @@
 namespace LeKoala\DevToolkit\Buttons;
 
 use SilverStripe\ORM\DB;
-use SilverStripe\ORM\ArrayLib;
+use SilverStripe\Core\ArrayLib;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Core\Config\Config;
